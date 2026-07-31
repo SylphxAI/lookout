@@ -18,6 +18,8 @@ bun install
 
 ```bash
 # CLI
+./bin/lookout doctor
+./bin/lookout tools
 ./bin/lookout search "local-first agents"
 ./bin/lookout fetch https://example.com
 ./bin/lookout extract https://example.com
