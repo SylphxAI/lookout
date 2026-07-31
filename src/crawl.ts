@@ -10,6 +10,8 @@ export type CrawlPage = {
   status?: number;
   ok: boolean;
   title?: string;
+  description?: string;
+  textExcerpt?: string;
   links: string[];
   error?: string;
 };
@@ -24,9 +26,31 @@ export type CrawlResult = {
   route: string;
 };
 
-function extractTitle(html: string): string | undefined {
+export function extractTitle(html: string): string | undefined {
   const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return m ? decodeEntities(m[1]?.replace(/<[^>]+>/g, '').trim() ?? '') : undefined;
+}
+
+export function extractDescription(html: string): string | undefined {
+  const og = html.match(
+    /<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+  ) || html.match(
+    /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:description["'][^>]*>/i,
+  );
+  if (og?.[1]) return decodeEntities(og[1].trim());
+  const md = html.match(
+    /<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i,
+  ) || html.match(
+    /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["'][^>]*>/i,
+  );
+  return md?.[1] ? decodeEntities(md[1].trim()) : undefined;
+}
+
+export function extractTextExcerpt(html: string, max = 400): string | undefined {
+  const body = html.replace(/<script[\s\S]*?<\/script>/gi, ' ').replace(/<style[\s\S]*?<\/style>/gi, ' ');
+  const text = decodeEntities(body.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim());
+  if (!text) return undefined;
+  return text.slice(0, max);
 }
 
 function extractLinks(html: string, base: string): string[] {
@@ -88,6 +112,8 @@ export async function webCrawl(
       status: fetched.status,
       ok: fetched.ok,
       title: fetched.body ? extractTitle(fetched.body) : undefined,
+      description: fetched.body ? extractDescription(fetched.body) : undefined,
+      textExcerpt: fetched.body ? extractTextExcerpt(fetched.body) : undefined,
       links: links.slice(0, 50),
       error: fetched.ok ? undefined : fetched.message,
     });
