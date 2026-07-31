@@ -178,6 +178,10 @@ export class LookoutEngine {
       const body = (fetched.answer as { body?: string })?.body;
       html = body;
       url = (fetched.answer as { finalUrl?: string })?.finalUrl ?? url;
+      if (!input.contentType) {
+        const ct = (fetched.answer as { contentType?: string })?.contentType;
+        if (ct) input = { ...input, contentType: ct };
+      }
     }
     if (!html) {
       return {
