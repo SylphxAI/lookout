@@ -2,11 +2,11 @@
  * Lookout SDK — local-first web instrument (Sylphx Instruments).
  * Surfaces: SDK · CLI · MCP share LookoutEngine semantics.
  */
-import { LookoutEngine, type EngineOptions, type ToolEnvelope, CORE_TOOLS } from './engine.ts';
+import { LookoutEngine, type EngineOptions, type ToolEnvelope, CORE_TOOLS, ADVANCED_TOOLS } from './engine.ts';
 
 export type LookoutOptions = EngineOptions;
 export type { ToolEnvelope };
-export { CORE_TOOLS, LookoutEngine };
+export { CORE_TOOLS, ADVANCED_TOOLS, LookoutEngine };
 
 export class Lookout {
   private readonly engine: LookoutEngine;
@@ -33,6 +33,11 @@ export class Lookout {
 
   cache(input: Record<string, unknown> = {}) {
     return this.engine.handle('web_cache', input);
+  }
+
+  /** Advanced: depth-limited same-origin crawl */
+  crawl(url: string, input: Record<string, unknown> = {}) {
+    return this.engine.handle('web_crawl', { ...input, url });
   }
 
   /** Escape hatch for MCP-identical tool names. */

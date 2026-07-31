@@ -63,6 +63,20 @@ server.tool(
 );
 
 server.tool(
+  'web_crawl',
+  'Depth-limited same-origin crawl (advanced). SSRF-safe; not a full-site crawler.',
+  {
+    url: z.string().url(),
+    maxDepth: z.number().int().min(0).max(3).optional(),
+    maxPages: z.number().int().min(1).max(25).optional(),
+  },
+  async (args) => {
+    const envelope = await engine.handle('web_crawl', args as Record<string, unknown>);
+    return textResult(envelope, envelope.status !== 'ok');
+  },
+);
+
+server.tool(
   'web_cache',
   'Query, stats, or clear the local Lookout cache.',
   {

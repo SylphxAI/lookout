@@ -11,5 +11,7 @@ describe('MCP tool contract', () => {
     }
     // clear tools not merged into one god tool
     expect(CORE_TOOLS).toEqual(['web_search', 'web_fetch', 'web_extract', 'web_cache']);
+    // advanced tools stay separate (not folded into core)
+    expect(src).toContain("'web_crawl'");
   });
 });

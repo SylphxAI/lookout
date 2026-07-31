@@ -2,6 +2,7 @@ import { LookoutCache, cacheKey, defaultCacheDir } from './cache.ts';
 import { extractFromHtml } from './extract.ts';
 import { webFetch } from './fetch.ts';
 import { webSearch } from './search.ts';
+import { webCrawl } from './crawl.ts';
 
 export type ToolEnvelope = {
   status: 'ok' | 'error';
@@ -34,6 +35,8 @@ export class LookoutEngine {
         return this.extract(input);
       case 'web_cache':
         return this.cacheTool(input);
+      case 'web_crawl':
+        return this.crawl(input);
       default:
         return {
           status: 'error',
@@ -183,6 +186,32 @@ export class LookoutEngine {
     };
   }
 
+
+  private async crawl(input: Record<string, unknown>): Promise<ToolEnvelope> {
+    const url = String(input.url ?? input.seed ?? '');
+    if (!url) {
+      return {
+        status: 'error',
+        tool: 'web_crawl',
+        warnings: [],
+        code: 'INVALID_INPUT',
+        message: 'web_crawl requires url',
+      };
+    }
+    const result = await webCrawl(url, {
+      maxDepth: typeof input.maxDepth === 'number' ? input.maxDepth : undefined,
+      maxPages: typeof input.maxPages === 'number' ? input.maxPages : undefined,
+    });
+    return {
+      status: result.ok ? 'ok' : 'error',
+      tool: 'web_crawl',
+      answer: result,
+      warnings: result.warnings,
+      route: result.route,
+      code: result.ok ? undefined : 'CRAWL_FAILED',
+    };
+  }
+
   private cacheTool(input: Record<string, unknown>): ToolEnvelope {
     const op = String(input.op ?? input.operation ?? 'query');
     if (op === 'stats') {
@@ -225,3 +254,4 @@ export class LookoutEngine {
 }
 
 export const CORE_TOOLS = ['web_search', 'web_fetch', 'web_extract', 'web_cache'] as const;
+export const ADVANCED_TOOLS = ['web_crawl'] as const;

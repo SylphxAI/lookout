@@ -1,5 +1,5 @@
 import { existsSync } from 'node:fs';
-import { CORE_TOOLS, LookoutEngine } from './engine.ts';
+import { ADVANCED_TOOLS, CORE_TOOLS, LookoutEngine } from './engine.ts';
 import { defaultCacheDir } from './cache.ts';
 import { assertSafeUrl } from './ssrf.ts';
 
@@ -15,7 +15,7 @@ export function runDoctor(version = '0.1.0'): DoctorReport {
   checks.push({
     name: 'core_tools',
     status: CORE_TOOLS.length === 4 ? 'ok' : 'fail',
-    message: `tools: ${CORE_TOOLS.join(', ')}`,
+    message: `core: ${CORE_TOOLS.join(', ')}; advanced: ${ADVANCED_TOOLS.join(', ')}`,
   });
   const cacheDir = defaultCacheDir();
   checks.push({

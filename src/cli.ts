@@ -11,6 +11,7 @@ Usage:
   lookout cache [query]
   lookout cache stats
   lookout cache clear
+  lookout crawl <url> [--depth N] [--pages N]
   lookout mcp
   lookout tools
   lookout doctor
@@ -60,6 +61,19 @@ async function main() {
       else if (rest[0] === 'clear') envelope = await engine.handle('web_cache', { op: 'clear' });
       else envelope = await engine.handle('web_cache', { op: 'query', query: rest.join(' ') });
       break;
+    case 'crawl': {
+      let depth: number | undefined;
+      let pages: number | undefined;
+      const args = [...rest];
+      const url = args.shift();
+      while (args.length) {
+        const a = args.shift()!;
+        if (a === '--depth') depth = Number(args.shift());
+        else if (a === '--pages') pages = Number(args.shift());
+      }
+      envelope = await engine.handle('web_crawl', { url, maxDepth: depth, maxPages: pages });
+      break;
+    }
     default:
       console.error(`Unknown command: ${cmd}`);
       usage();
