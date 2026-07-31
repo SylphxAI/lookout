@@ -78,6 +78,7 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 | `LOOKOUT_CACHE_DIR` | Cache directory (default `~/.cache/lookout`) |
 | `LOOKOUT_CACHE_MAX_AGE_MS` | Optional max age for search/fetch cache hits |
 | `LOOKOUT_LIVE=1` | Enable optional live network tests |
+| `LOOKOUT_USER_AGENT` | Optional User-Agent override for fetch |
 
 ## Safety
 

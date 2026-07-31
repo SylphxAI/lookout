@@ -29,6 +29,12 @@ export function runDoctor(version = '0.1.0'): DoctorReport {
     status: 'ok',
     message: maxAge ? `LOOKOUT_CACHE_MAX_AGE_MS=${maxAge}` : 'LOOKOUT_CACHE_MAX_AGE_MS unset (cache entries not age-limited)',
   });
+  const ua = process.env.LOOKOUT_USER_AGENT?.trim();
+  checks.push({
+    name: 'user_agent_env',
+    status: 'ok',
+    message: ua ? `LOOKOUT_USER_AGENT set (${ua.slice(0, 48)})` : 'LOOKOUT_USER_AGENT unset (default Lookout UA)',
+  });
   const ssrf = assertSafeUrl('http://127.0.0.1/');
   checks.push({
     name: 'ssrf_blocks_loopback',
