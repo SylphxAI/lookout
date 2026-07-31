@@ -13,6 +13,7 @@ Usage:
   lookout cache clear
   lookout mcp
   lookout tools
+  lookout doctor
   lookout help
 
 Env:
@@ -28,6 +29,13 @@ async function main() {
   if (cmd === 'tools') {
     console.log(JSON.stringify(CORE_TOOLS, null, 2));
     return;
+  }
+
+  if (cmd === 'doctor') {
+    const { runDoctor, formatDoctorReport } = await import('./doctor.ts');
+    const report = runDoctor();
+    console.log(formatDoctorReport(report));
+    process.exit(report.ok ? 0 : 1);
   }
 
   if (cmd === 'mcp') {

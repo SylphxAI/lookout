@@ -2,7 +2,7 @@
   "name": "@sylphx/lookout",
   "version": "0.1.0",
   "private": false,
-  "description": "Lookout — local-first web instrument for agents (Sylphx Instruments). Search, fetch, extract, cache. SDK · CLI · MCP.",
+  "description": "Lookout \u2014 local-first web instrument for agents (Sylphx Instruments). Search, fetch, extract, cache. SDK \u00b7 CLI \u00b7 MCP.",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -35,5 +35,14 @@
     "type": "git",
     "url": "git+https://github.com/SylphxAI/lookout.git"
   },
-  "homepage": "https://github.com/SylphxAI/lookout#readme"
+  "homepage": "https://github.com/SylphxAI/lookout#readme",
+  "mcpName": "io.github.SylphxAI/lookout",
+  "keywords": [
+    "mcp",
+    "local-first",
+    "web-search",
+    "lookout",
+    "sylphx",
+    "agent"
+  ]
 }
