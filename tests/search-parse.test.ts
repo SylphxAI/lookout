@@ -56,6 +56,17 @@ describe('normalizeResultUrl', () => {
 });
 
 describe('fuse host diversity', () => {
+  test('annotates final rank in scoreExplain', () => {
+    const fused = fuse([
+      [
+        { title: 'a', url: 'https://a.com/1', snippet: '', engine: 't', score: 0.9, scoreExplain: [] as string[] },
+        { title: 'b', url: 'https://b.com/1', snippet: '', engine: 't', score: 0.8, scoreExplain: [] as string[] },
+      ],
+    ]);
+    expect(fused[0]?.scoreExplain.some((s) => s.startsWith('rank='))).toBe(true);
+    expect(fused[0]?.scoreExplain).toContain('rank=1');
+  });
+
   test('soft-penalizes repeated hostnames', () => {
     const a = [
       { title: '1', url: 'https://example.com/a', snippet: '', engine: 't', score: 0.9, scoreExplain: [] as string[] },

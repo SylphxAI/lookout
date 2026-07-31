@@ -188,7 +188,11 @@ export function fuse(hitLists: SearchHit[][]): SearchHit[] {
     }
     hostCount.set(host, n + 1);
   }
-  return ranked.sort((a, b) => b.score - a.score).slice(0, 12);
+  const finalRanked = ranked.sort((a, b) => b.score - a.score).slice(0, 12);
+  return finalRanked.map((hit, i) => ({
+    ...hit,
+    scoreExplain: [...hit.scoreExplain, `rank=${i + 1}`],
+  }));
 }
 
 export async function webSearch(query: string): Promise<SearchResult> {
