@@ -11,8 +11,12 @@ const html = `<!doctype html><html><head>
 <meta name="description" content="A local-first web instrument" />
 <script type="application/ld+json">{"@type":"WebPage","name":"Hello"}</script>
 </head><body>
+<main>
+<h1>Primary heading</h1>
+<p>Body text for agents with enough content to prefer main.</p>
+<a href="https://example.com/docs">Docs</a>
 <table><tr><th>A</th><th>B</th></tr><tr><td>1</td><td>2</td></tr></table>
-<p>Body text for agents.</p>
+</main>
 </body></html>`;
 
 describe('extract', () => {
@@ -24,6 +28,10 @@ describe('extract', () => {
     expect(r.jsonLd.length).toBe(1);
     expect(r.tables.length).toBe(1);
     expect(r.spans.some((s) => s.kind === 'title')).toBe(true);
+    expect(r.headings.some((h) => h.level === 1 && h.text.includes('Primary'))).toBe(true);
+    expect(r.links.some((l) => l.href.includes('/docs'))).toBe(true);
+    expect(r.route).toBe('html_main');
+    expect(r.textExcerpt).toContain('Body text for agents');
   });
 });
 

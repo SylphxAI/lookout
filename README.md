@@ -6,6 +6,20 @@
 
 Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) (learn multi-surface + honesty; **do not** require multi-GB browser/model warmup).
 
+
+## Why Lookout (vs multi-GB “local web” stacks)
+
+| Typical agent web path | Lookout |
+| --- | --- |
+| Paid search API keys | Default **public adapters**, $0/query |
+| Multi-GB browser + model warmup | **Tiny default** — HTML search/fetch/extract |
+| Opaque snippets | **Cite spans** + extract route + warnings |
+| One mega-tool | **Clear tools**: search · fetch · extract · cache (+ advanced crawl) |
+
+Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) — learn multi-surface honesty; **do not** require heavy browser/model installs on the default path.
+
+Evidence is a **result contract** (spans, routes, warnings) — not a tool named `evidence_first`.
+
 ## Install (dev)
 
 ```bash

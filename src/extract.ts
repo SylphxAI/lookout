@@ -11,6 +11,8 @@ export type ExtractResult = {
   title?: string;
   description?: string;
   textExcerpt?: string;
+  headings: { level: number; text: string }[];
+  links: { href: string; text: string }[];
   jsonLd: unknown[];
   tables: { rows: string[][] }[];
   spans: CiteSpan[];
@@ -22,16 +24,44 @@ function stripTags(html: string): string {
   return html
     .replace(/<script[\s\S]*?<\/script>/gi, ' ')
     .replace(/<style[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript[\s\S]*?<\/noscript>/gi, ' ')
     .replace(/<[^>]+>/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
+}
+
+function decodeBasicEntities(s: string): string {
+  return s
+    .replace(/&amp;/g, '&')
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&quot;/g, '"')
+    .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ');
+}
+
+/** Prefer <article>/<main>, else body, else full document for readable text. */
+function pickContentHtml(html: string): { html: string; route: string } {
+  const article = html.match(/<article\b[^>]*>([\s\S]*?)<\/article>/i);
+  if (article?.[1] && stripTags(article[1]).length > 40) {
+    return { html: article[1], route: 'html_article' };
+  }
+  const main = html.match(/<main\b[^>]*>([\s\S]*?)<\/main>/i);
+  if (main?.[1] && stripTags(main[1]).length > 40) {
+    return { html: main[1], route: 'html_main' };
+  }
+  const body = html.match(/<body\b[^>]*>([\s\S]*?)<\/body>/i);
+  if (body?.[1]) {
+    return { html: body[1], route: 'html_body' };
+  }
+  return { html, route: 'html_dom_light' };
 }
 
 export function extractFromHtml(html: string, url?: string): ExtractResult {
   const warnings: string[] = [];
   const spans: CiteSpan[] = [];
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const title = titleMatch ? stripTags(titleMatch[1] ?? '') : undefined;
+  const title = titleMatch ? decodeBasicEntities(stripTags(titleMatch[1] ?? '')) : undefined;
   if (title && titleMatch && titleMatch.index !== undefined) {
     const raw = titleMatch[1] ?? '';
     const start = titleMatch.index + titleMatch[0].indexOf(raw);
@@ -43,7 +73,7 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
     html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']description["'][^>]*>/i);
   if (metaDesc) {
-    description = stripTags(metaDesc[1] ?? '');
+    description = decodeBasicEntities(stripTags(metaDesc[1] ?? ''));
     if (metaDesc.index !== undefined) {
       spans.push({
         text: description,
@@ -77,18 +107,57 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
       const cellRe = /<t[dh][^>]*>([\s\S]*?)<\/t[dh]>/gi;
       let c: RegExpExecArray | null;
       while ((c = cellRe.exec(r[1] ?? '')) !== null) {
-        cells.push(stripTags(c[1] ?? ''));
+        cells.push(decodeBasicEntities(stripTags(c[1] ?? '')));
       }
       if (cells.length) rows.push(cells);
     }
     if (rows.length) tables.push({ rows });
-    if (tables.length >= 5) break;
+    if (tables.length >= 8) break;
   }
 
-  const textExcerpt = stripTags(html).slice(0, 2000);
-  if (textExcerpt) {
-    spans.push({ text: textExcerpt.slice(0, 240), start: 0, end: Math.min(240, html.length), kind: 'excerpt' });
+  const headings: { level: number; text: string }[] = [];
+  const hRe = /<h([1-6])\b[^>]*>([\s\S]*?)<\/h\1>/gi;
+  while ((m = hRe.exec(html)) !== null) {
+    const level = Number(m[1] ?? 1);
+    const text = decodeBasicEntities(stripTags(m[2] ?? ''));
+    if (!text) continue;
+    headings.push({ level, text });
+    if (m.index !== undefined) {
+      spans.push({
+        text,
+        start: m.index,
+        end: m.index + m[0].length,
+        kind: `heading_h${level}`,
+      });
+    }
+    if (headings.length >= 30) break;
   }
+
+  const links: { href: string; text: string }[] = [];
+  const aRe = /<a\b[^>]*href=["']([^"'#][^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
+  while ((m = aRe.exec(html)) !== null) {
+    const href = (m[1] ?? '').trim();
+    const text = decodeBasicEntities(stripTags(m[2] ?? '')).slice(0, 200);
+    if (!href || href.startsWith('javascript:')) continue;
+    links.push({ href, text });
+    if (links.length >= 40) break;
+  }
+
+  const content = pickContentHtml(html);
+  const textExcerpt = decodeBasicEntities(stripTags(content.html)).slice(0, 4000);
+  if (textExcerpt) {
+    spans.push({
+      text: textExcerpt.slice(0, 280),
+      start: 0,
+      end: Math.min(280, html.length),
+      kind: 'excerpt',
+    });
+  } else {
+    warnings.push('empty_text_excerpt');
+  }
+
+  if (!title) warnings.push('missing_title');
+  if (!description) warnings.push('missing_description');
 
   return {
     ok: true,
@@ -96,10 +165,12 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     title,
     description,
     textExcerpt,
+    headings,
+    links,
     jsonLd,
     tables,
     spans,
-    route: 'html_dom_light',
+    route: content.route,
     warnings,
   };
 }

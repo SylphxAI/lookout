@@ -2,7 +2,7 @@
   "name": "@sylphx/lookout",
   "version": "0.1.0",
   "private": false,
-  "description": "Lookout \u2014 local-first web instrument for agents (Sylphx Instruments). Search, fetch, extract, cache. SDK \u00b7 CLI \u00b7 MCP.",
+  "description": "Lookout \u2014 local-first web instrument for agents. Search, fetch, extract, cache with citeable excerpts. No required API key. SDK \u00b7 CLI \u00b7 MCP.",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -22,7 +22,8 @@
   "scripts": {
     "test": "bun test",
     "start": "bun src/cli.ts",
-    "mcp": "bun src/mcp.ts"
+    "mcp": "bun src/mcp.ts",
+    "doctor": "./bin/lookout doctor"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
