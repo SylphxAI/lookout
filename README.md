@@ -2,48 +2,63 @@
 
 ### The web from your machine. *(Sylphx Instruments)*
 
-**Lookout** is a local-first **web instrument** for agents and apps: search, fetch, extract, and cache with citeable excerpts — **no required API key**, **tiny default install**, same API on **SDK · CLI · MCP**.
+**Lookout** is a local-first **web instrument** for agents and apps: **search, fetch, extract, cache** with citeable excerpts — **no required API key**, **tiny default install**, same API on **SDK · CLI · MCP**.
 
-> Scaffold / greenfield. Spec:  
-> https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/specs/lookout-product-spec-v0.md
+Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) (learn multi-surface + honesty; **do not** require multi-GB browser/model warmup).
 
-## Why
+## Install (dev)
 
-| Cloud web tools | Lookout (target) |
-| --- | --- |
-| API keys + metered cost | $0 core path, no required key |
-| Opaque host search | Portable MCP/SDK/CLI |
-| Heavy local stacks (~GB warmup) | **Light default**; optional heavy profile later |
+```bash
+git clone https://github.com/SylphxAI/lookout.git
+cd lookout
+bun install
+./bin/lookout tools
+./bin/lookout extract   # via engine with -- see CLI
+```
 
-Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) — learn multi-surface + honest results; **do not** require multi-GB browser/model init for the default path.
+```bash
+# CLI
+./bin/lookout search "local-first agents"
+./bin/lookout fetch https://example.com
+./bin/lookout extract https://example.com
+./bin/lookout cache stats
 
-## Surfaces (target)
+# MCP (stdio)
+bun src/mcp.ts
+# or: ./bin/lookout mcp
+```
 
-| Surface | Status in this scaffold |
-| --- | --- |
-| Core | Rust crate stub `lookout-core` |
-| CLI | `bin/lookout` stub |
-| MCP | planned tools: `web_search`, `web_fetch`, `web_extract`, `web_cache` |
-| SDK | TypeScript `src/sdk.ts` stub |
-| Tests | placeholder |
+## SDK
+
+```ts
+import { Lookout } from '@sylphx/lookout'
+
+const lookout = Lookout.create()
+const search = await lookout.search('model context protocol')
+const page = await lookout.fetch('https://example.com')
+const extracted = await lookout.extract({ url: 'https://example.com' })
+```
 
 ## Tools (clear, not merged)
 
-**Core:** `web_search` · `web_fetch` · `web_extract` · `web_cache`  
-**Advanced (later):** crawl · similar · diff/watch · research  
+| Tool | Job |
+| --- | --- |
+| `web_search` | Public adapters (DuckDuckGo HTML + Wikipedia), rank fusion, score explain |
+| `web_fetch` | SSRF-safe HTTP(S) fetch, redirects, size limits, cite spans |
+| `web_extract` | Title, description, JSON-LD, tables, spans from HTML/URL |
+| `web_cache` | Local disk cache query/stats/clear (`LOOKOUT_CACHE_DIR` / `~/.cache/lookout`) |
 
-## Install (not published yet)
+## Safety
 
-```bash
-# after first release
-# npm i -g @sylphx/lookout
-# lookout search "local-first agents"
-```
+- Private IPv4/IPv6, localhost, link-local metadata hosts **denied**
+- Only `http`/`https`
+- Redirect cap + response size cap
 
 ## Family
 
-Part of **Sylphx Instruments**: Citra · Iris · Cue · Prism · Spine · **Lookout**  
-SSOT: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/sylphx-instruments-ssot.md
+Citra · Iris · Cue · Prism · Spine · **Lookout**  
+SSOT: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/sylphx-instruments-ssot.md  
+Spec: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/specs/lookout-product-spec-v0.md
 
 ## License
 

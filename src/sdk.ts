@@ -1,33 +1,43 @@
 /**
- * Lookout SDK stub — isomorphic surface reserved for web_search/fetch/extract/cache.
- * Implementation lands in Phase 1 per product spec.
+ * Lookout SDK — local-first web instrument (Sylphx Instruments).
+ * Surfaces: SDK · CLI · MCP share LookoutEngine semantics.
  */
-export type LookoutOptions = {
-  /** Optional cache directory override */
-  cacheDir?: string;
-};
+import { LookoutEngine, type EngineOptions, type ToolEnvelope, CORE_TOOLS } from './engine.ts';
+
+export type LookoutOptions = EngineOptions;
+export type { ToolEnvelope };
+export { CORE_TOOLS, LookoutEngine };
 
 export class Lookout {
-  constructor(private readonly options: LookoutOptions = {}) {}
+  private readonly engine: LookoutEngine;
+
+  constructor(options: LookoutOptions = {}) {
+    this.engine = new LookoutEngine(options);
+  }
 
   static create(options?: LookoutOptions): Lookout {
     return new Lookout(options);
   }
 
-  search(_query: string | string[]): Promise<never> {
-    return Promise.reject(new Error('Lookout Phase 1 not implemented — scaffold only'));
+  search(query: string | string[], input: Record<string, unknown> = {}) {
+    return this.engine.handle('web_search', { ...input, query });
   }
 
-  fetch(_url: string): Promise<never> {
-    return Promise.reject(new Error('Lookout Phase 1 not implemented — scaffold only'));
+  fetch(url: string, input: Record<string, unknown> = {}) {
+    return this.engine.handle('web_fetch', { ...input, url });
   }
 
-  extract(_input: Record<string, unknown>): Promise<never> {
-    return Promise.reject(new Error('Lookout Phase 1 not implemented — scaffold only'));
+  extract(input: { url?: string; html?: string } & Record<string, unknown>) {
+    return this.engine.handle('web_extract', input);
   }
 
-  cache(_input: Record<string, unknown>): Promise<never> {
-    return Promise.reject(new Error('Lookout Phase 1 not implemented — scaffold only'));
+  cache(input: Record<string, unknown> = {}) {
+    return this.engine.handle('web_cache', input);
+  }
+
+  /** Escape hatch for MCP-identical tool names. */
+  call(tool: (typeof CORE_TOOLS)[number], input: Record<string, unknown> = {}) {
+    return this.engine.handle(tool, input);
   }
 }
 

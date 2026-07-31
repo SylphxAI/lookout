@@ -1,5 +1,11 @@
 #!/usr/bin/env bash
 set -euo pipefail
-echo "Lookout scaffold — Phase 1 engine not implemented yet." >&2
-echo "See docs in architecture-reader-mcp: docs/portfolio/specs/lookout-product-spec-v0.md" >&2
+ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+if command -v bun >/dev/null 2>&1; then
+  exec bun "$ROOT/src/cli.ts" "$@"
+fi
+if command -v node >/dev/null 2>&1; then
+  exec node --experimental-strip-types "$ROOT/src/cli.ts" "$@"
+fi
+echo "lookout requires bun or node>=22" >&2
 exit 1

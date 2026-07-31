@@ -1,8 +1,8 @@
 {
   "name": "@sylphx/lookout",
-  "version": "0.0.0",
-  "private": true,
-  "description": "Lookout — local-first web instrument for agents (Sylphx Instruments). Scaffold.",
+  "version": "0.1.0",
+  "private": false,
+  "description": "Lookout — local-first web instrument for agents (Sylphx Instruments). Search, fetch, extract, cache. SDK · CLI · MCP.",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -10,13 +10,30 @@
   },
   "exports": {
     ".": "./src/sdk.ts",
-    "./sdk": "./src/sdk.ts"
+    "./sdk": "./src/sdk.ts",
+    "./engine": "./src/engine.ts"
   },
+  "files": [
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE"
+  ],
   "scripts": {
     "test": "bun test",
-    "typecheck": "tsc --noEmit"
+    "start": "bun src/cli.ts",
+    "mcp": "bun src/mcp.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "zod": "^3.25.76"
   },
   "engines": {
     "node": ">=20"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/SylphxAI/lookout.git"
+  },
+  "homepage": "https://github.com/SylphxAI/lookout#readme"
 }
