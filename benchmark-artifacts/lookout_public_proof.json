@@ -1,0 +1,23 @@
+{
+  "product": "Lookout",
+  "ms": 1.3265540000000016,
+  "coreTools": [
+    "web_search",
+    "web_fetch",
+    "web_extract",
+    "web_cache"
+  ],
+  "advancedTools": [
+    "web_crawl",
+    "web_research"
+  ],
+  "extractRoute": "html_main",
+  "extractTitle": "Lookout Proof",
+  "headings": 1,
+  "ddgUnwrapOk": true,
+  "researchRequiresQuery": true,
+  "doctorOk": true,
+  "hasSkill": true,
+  "ok": true,
+  "generatedAt": "2026-07-31T17:19:03.413Z"
+}

@@ -45,6 +45,8 @@ add('research_requires_query', researchMissing.status === 'error', researchMissi
 const doctor = runDoctor();
 add('doctor_ok', doctor.ok, doctor.ok ? 'doctor ok' : 'doctor fail');
 add('agent_skill', existsSync(join(process.cwd(), 'skills/lookout/SKILL.md')), 'skills/lookout/SKILL.md');
+add('public_proof_script', existsSync(join(process.cwd(), 'scripts/public-proof.ts')), 'scripts/public-proof.ts');
+add('brand_publish_doc', existsSync(join(process.cwd(), 'docs/BRAND_PUBLISH.md')), 'docs/BRAND_PUBLISH.md');
 
 const report = {
   profile: 'lookout_release_gate',

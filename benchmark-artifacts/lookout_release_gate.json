@@ -1,10 +1,10 @@
 {
   "profile": "lookout_release_gate",
-  "generated_at": "2026-07-31T17:16:28.723Z",
+  "generated_at": "2026-07-31T17:19:45.848Z",
   "status": "passed",
   "summary": {
-    "total": 9,
-    "passed": 9,
+    "total": 11,
+    "passed": 11,
     "failed": 0
   },
   "checks": [
@@ -52,6 +52,16 @@
       "id": "agent_skill",
       "status": "passed",
       "message": "skills/lookout/SKILL.md"
+    },
+    {
+      "id": "public_proof_script",
+      "status": "passed",
+      "message": "scripts/public-proof.ts"
+    },
+    {
+      "id": "brand_publish_doc",
+      "status": "passed",
+      "message": "docs/BRAND_PUBLISH.md"
     }
   ]
 }
