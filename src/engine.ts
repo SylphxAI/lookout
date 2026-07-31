@@ -225,6 +225,30 @@ export class LookoutEngine {
         route: 'json_body',
       };
     }
+    const ct = typeof input.contentType === 'string' ? input.contentType : '';
+    if ((ct.includes('text/plain') || ct.includes('text/markdown')) && !/<html[\s>]/i.test(html) && !/<body[\s>]/i.test(html)) {
+      const text = html.slice(0, 4000);
+      return {
+        status: 'ok',
+        tool: 'web_extract',
+        answer: {
+          ok: true,
+          url,
+          textExcerpt: text,
+          headings: [],
+          links: [],
+          jsonLd: [],
+          tables: [],
+          spans: text
+            ? [{ text: text.slice(0, 240), start: 0, end: Math.min(240, text.length), kind: 'text_excerpt' }]
+            : [],
+          route: ct.includes('markdown') ? 'text_markdown' : 'text_plain',
+          warnings: [],
+        },
+        warnings: [],
+        route: ct.includes('markdown') ? 'text_markdown' : 'text_plain',
+      };
+    }
     const extracted = extractFromHtml(html, url);
     return {
       status: 'ok',

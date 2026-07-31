@@ -126,3 +126,16 @@ describe('engine json extract', () => {
     expect(JSON.stringify(env.answer)).toContain('hello');
   });
 });
+
+describe('engine text extract', () => {
+  test('extracts plain text body', async () => {
+    const eng = new LookoutEngine({ cacheDir: '/tmp/lookout-text-extract' });
+    const env = await eng.handle('web_extract', {
+      html: 'hello plain text body for agents',
+      contentType: 'text/plain; charset=utf-8',
+    });
+    expect(env.status).toBe('ok');
+    expect((env.answer as { route?: string }).route).toBe('text_plain');
+    expect(JSON.stringify(env.answer)).toContain('hello plain');
+  });
+});
