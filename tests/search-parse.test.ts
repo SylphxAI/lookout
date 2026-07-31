@@ -6,6 +6,7 @@ import {
   fuse,
   normalizeResultUrl,
   parseDuckDuckGoHtml,
+  parseHnAlgoliaJson,
   parseNpmSearchJson,
   parseWikipediaOpensearch,
 } from '../src/search.ts';
@@ -138,5 +139,26 @@ describe('npm registry parse', () => {
     expect(hits[0]?.title).toBe('@sylphx/lookout');
     expect(hits[0]?.engine).toBe('npm_registry');
     expect(hits[0]?.url).toContain('npmjs.com');
+  });
+});
+
+
+describe('hn algolia parse', () => {
+  test('parses HN search JSON', () => {
+    const body = JSON.stringify({
+      hits: [
+        {
+          title: 'Local-first agents',
+          url: 'https://example.com/post',
+          points: 120,
+          author: 'alice',
+          objectID: '1',
+        },
+      ],
+    });
+    const hits = parseHnAlgoliaJson(body);
+    expect(hits.length).toBe(1);
+    expect(hits[0]?.engine).toBe('hn_algolia');
+    expect(hits[0]?.title).toContain('Local-first');
   });
 });

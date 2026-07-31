@@ -19,7 +19,7 @@ npx @sylphx/lookout
 
 | Tool | Job |
 | --- | --- |
-| `web_search` | Public adapters (DDG HTML + Wikipedia + **npm registry**), rank fusion, query-term boost, **hostsInclude/hostsExclude** |
+| `web_search` | Public adapters (DDG HTML + Wikipedia + **npm registry + HN Algolia**), rank fusion, query-term boost, **hostsInclude/hostsExclude** |
 | `web_fetch` | SSRF-safe fetch + body prefix spans |
 | `web_extract` | Title, headings, links, tables, canonical/author/og, main/json route |
 | `web_cache` | query/stats/clear/**prune** |

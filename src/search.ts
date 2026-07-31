@@ -1,6 +1,6 @@
 /**
  * Lightweight multi-adapter search without API keys.
- * Primary: DuckDuckGo HTML. Fallbacks: Wikipedia opensearch + npm registry (no key).
+ * Primary: DuckDuckGo HTML. Fallbacks: Wikipedia, npm registry, HN Algolia (no key).
  */
 import { webFetch } from './fetch.ts';
 
@@ -163,6 +163,50 @@ async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warn
 }
 
 
+
+/** Free HN Algolia search — tech discussion without API keys. */
+export function parseHnAlgoliaJson(body: string): SearchHit[] {
+  try {
+    const data = JSON.parse(body) as {
+      hits?: Array<{ title?: string; url?: string; story_url?: string; objectID?: string; points?: number; author?: string }>;
+    };
+    const hits: SearchHit[] = [];
+    for (const h of data.hits ?? []) {
+      const title = h.title?.trim();
+      if (!title) continue;
+      const url =
+        h.url ||
+        h.story_url ||
+        (h.objectID ? `https://news.ycombinator.com/item?id=${h.objectID}` : '');
+      if (!url.startsWith('http')) continue;
+      const points = typeof h.points === 'number' ? h.points : 0;
+      hits.push({
+        title,
+        url,
+        snippet: h.author ? `by ${h.author}${points ? ` · ${points} points` : ''}` : '',
+        engine: 'hn_algolia',
+        score: Math.min(1.2, 0.35 + Math.log10(points + 1) * 0.25),
+        scoreExplain: ['engine=hn_algolia', `points=${points}`],
+        host: hostnameOf(url),
+      });
+    }
+    return hits;
+  } catch {
+    return [];
+  }
+}
+
+async function searchHackerNews(query: string): Promise<{ hits: SearchHit[]; warning?: string }> {
+  const url = `https://hn.algolia.com/api/v1/search?query=${encodeURIComponent(query)}&tags=story&hitsPerPage=6`;
+  const res = await webFetch(url, { timeoutMs: 12_000 });
+  if (!res.ok || !res.body) {
+    return { hits: [], warning: res.message ?? res.code ?? 'hn_algolia_failed' };
+  }
+  const hits = parseHnAlgoliaJson(res.body);
+  if (!hits.length) return { hits: [], warning: 'hn_algolia_parse_empty' };
+  return { hits };
+}
+
 /** Free npm registry search — useful for agents resolving packages without API keys. */
 export function parseNpmSearchJson(body: string): SearchHit[] {
   try {
@@ -294,6 +338,11 @@ export async function webSearch(query: string): Promise<SearchResult> {
   engines.push({ name: 'npm_registry', ok: npm.hits.length > 0, message: npm.warning });
   if (npm.warning) warnings.push(`npm: ${npm.warning}`);
   if (npm.hits.length) lists.push(npm.hits);
+
+  const hn = await searchHackerNews(query);
+  engines.push({ name: 'hn_algolia', ok: hn.hits.length > 0, message: hn.warning });
+  if (hn.warning) warnings.push(`hn: ${hn.warning}`);
+  if (hn.hits.length) lists.push(hn.hits);
 
   const hits = fuse(lists, query);
   return {
