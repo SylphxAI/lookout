@@ -27,6 +27,14 @@ export class LookoutEngine {
     this.cache = new LookoutCache(options.cacheDir ?? defaultCacheDir());
   }
 
+  
+  private cacheMaxAgeMs(): number | undefined {
+    const raw = process.env.LOOKOUT_CACHE_MAX_AGE_MS?.trim();
+    if (!raw) return undefined;
+    const n = Number(raw);
+    return Number.isFinite(n) && n >= 0 ? n : undefined;
+  }
+
   async handle(tool: string, input: Record<string, unknown> = {}): Promise<ToolEnvelope> {
     switch (tool) {
       case 'web_search':
@@ -75,7 +83,7 @@ export class LookoutEngine {
     for (const q of queries) {
       const key = cacheKey(['search', q]);
       if (useCache) {
-        const cached = this.cache.get(key);
+        const cached = this.cache.get(key, { maxAgeMs: this.cacheMaxAgeMs() });
         if (cached) {
           const parsed = JSON.parse(cached.body) as Awaited<ReturnType<typeof webSearch>>;
           allHits.push(...parsed.hits.map((h) => ({ ...h, fromCache: true })));
@@ -121,7 +129,7 @@ export class LookoutEngine {
     const useCache = input.useCache !== false;
     const key = cacheKey(['fetch', url]);
     if (useCache) {
-      const cached = this.cache.get(key);
+      const cached = this.cache.get(key, { maxAgeMs: this.cacheMaxAgeMs() });
       if (cached) {
         return {
           status: 'ok',

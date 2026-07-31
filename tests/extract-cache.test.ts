@@ -61,6 +61,20 @@ describe('cache', () => {
     expect(c.clear().removed).toBe(1);
     rmSync(dir, { recursive: true, force: true });
   });
+
+  test('respects maxAgeMs', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lookout-cache-age-'));
+    const c = new LookoutCache(dir);
+    c.put({
+      key: 'old',
+      kind: 'fetch',
+      body: 'stale',
+      createdAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    expect(c.get('old')?.body).toBe('stale');
+    expect(c.get('old', { maxAgeMs: 1_000 })).toBeNull();
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
 
 describe('engine extract without network', () => {

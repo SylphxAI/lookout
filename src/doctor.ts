@@ -23,6 +23,12 @@ export function runDoctor(version = '0.1.0'): DoctorReport {
     status: 'ok',
     message: `cache dir ${cacheDir} (created on first use)`,
   });
+  const maxAge = process.env.LOOKOUT_CACHE_MAX_AGE_MS?.trim();
+  checks.push({
+    name: 'cache_max_age_env',
+    status: 'ok',
+    message: maxAge ? `LOOKOUT_CACHE_MAX_AGE_MS=${maxAge}` : 'LOOKOUT_CACHE_MAX_AGE_MS unset (cache entries not age-limited)',
+  });
   const ssrf = assertSafeUrl('http://127.0.0.1/');
   checks.push({
     name: 'ssrf_blocks_loopback',

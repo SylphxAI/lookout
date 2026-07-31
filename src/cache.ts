@@ -43,11 +43,18 @@ export class LookoutCache {
     return full;
   }
 
-  get(key: string): CacheRecord | null {
+  get(key: string, options: { maxAgeMs?: number } = {}): CacheRecord | null {
     const p = this.pathFor(key);
     if (!existsSync(p)) return null;
     try {
-      return JSON.parse(readFileSync(p, 'utf8')) as CacheRecord;
+      const rec = JSON.parse(readFileSync(p, 'utf8')) as CacheRecord;
+      if (typeof options.maxAgeMs === 'number' && options.maxAgeMs >= 0) {
+        const created = Date.parse(rec.createdAt);
+        if (!Number.isFinite(created) || Date.now() - created > options.maxAgeMs) {
+          return null;
+        }
+      }
+      return rec;
     } catch {
       return null;
     }
