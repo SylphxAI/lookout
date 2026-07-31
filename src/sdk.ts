@@ -35,6 +35,11 @@ export class Lookout {
     return this.engine.handle('web_cache', input);
   }
 
+  /** Remove cache entries older than maxAgeMs (default from LOOKOUT_CACHE_MAX_AGE_MS or 24h). */
+  prune(maxAgeMs?: number) {
+    return this.engine.handle('web_cache', { op: 'prune', maxAgeMs });
+  }
+
   /** Advanced: depth-limited same-origin crawl */
   crawl(url: string, input: Record<string, unknown> = {}) {
     return this.engine.handle('web_crawl', { ...input, url });
