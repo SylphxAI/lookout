@@ -6,6 +6,7 @@ import {
   fuse,
   normalizeResultUrl,
   parseDuckDuckGoHtml,
+  parseNpmSearchJson,
   parseWikipediaOpensearch,
 } from '../src/search.ts';
 
@@ -114,5 +115,28 @@ describe('filterHitsByHosts', () => {
     expect(onlyDocs.map((h) => h.host)).toEqual(['docs.example.com']);
     const noSpam = filterHitsByHosts(hits, { exclude: ['spam.bad'] });
     expect(noSpam.every((h) => h.host !== 'spam.bad')).toBe(true);
+  });
+});
+
+
+describe('npm registry parse', () => {
+  test('parses registry search JSON', () => {
+    const body = JSON.stringify({
+      objects: [
+        {
+          package: {
+            name: '@sylphx/lookout',
+            description: 'local web instrument',
+            links: { npm: 'https://www.npmjs.com/package/@sylphx/lookout' },
+          },
+          score: { final: 0.9 },
+        },
+      ],
+    });
+    const hits = parseNpmSearchJson(body);
+    expect(hits.length).toBe(1);
+    expect(hits[0]?.title).toBe('@sylphx/lookout');
+    expect(hits[0]?.engine).toBe('npm_registry');
+    expect(hits[0]?.url).toContain('npmjs.com');
   });
 });

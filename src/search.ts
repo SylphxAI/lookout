@@ -1,6 +1,6 @@
 /**
  * Lightweight multi-adapter search without API keys.
- * Primary: DuckDuckGo HTML. Fallback: Wikipedia opensearch (no key).
+ * Primary: DuckDuckGo HTML. Fallbacks: Wikipedia opensearch + npm registry (no key).
  */
 import { webFetch } from './fetch.ts';
 
@@ -162,6 +162,46 @@ async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warn
   }
 }
 
+
+/** Free npm registry search — useful for agents resolving packages without API keys. */
+export function parseNpmSearchJson(body: string): SearchHit[] {
+  try {
+    const data = JSON.parse(body) as {
+      objects?: Array<{ package?: { name?: string; description?: string; links?: { npm?: string } }; score?: { final?: number } }>;
+    };
+    const hits: SearchHit[] = [];
+    for (const obj of data.objects ?? []) {
+      const pkg = obj.package;
+      if (!pkg?.name) continue;
+      const url = pkg.links?.npm ?? `https://www.npmjs.com/package/${pkg.name}`;
+      const score = typeof obj.score?.final === 'number' ? obj.score.final : 0.5;
+      hits.push({
+        title: pkg.name,
+        url,
+        snippet: pkg.description ?? '',
+        engine: 'npm_registry',
+        score: Math.min(1.2, 0.4 + score),
+        scoreExplain: ['engine=npm_registry', `pkg=${pkg.name}`],
+        host: hostnameOf(url),
+      });
+    }
+    return hits;
+  } catch {
+    return [];
+  }
+}
+
+async function searchNpmRegistry(query: string): Promise<{ hits: SearchHit[]; warning?: string }> {
+  const url = `https://registry.npmjs.org/-/v1/search?text=${encodeURIComponent(query)}&size=6`;
+  const res = await webFetch(url, { timeoutMs: 12_000 });
+  if (!res.ok || !res.body) {
+    return { hits: [], warning: res.message ?? res.code ?? 'npm_registry_failed' };
+  }
+  const hits = parseNpmSearchJson(res.body);
+  if (!hits.length) return { hits: [], warning: 'npm_registry_parse_empty' };
+  return { hits };
+}
+
 /** Fuse multi-engine hits: URL dedupe, multi-engine boost, host diversity soft penalty. */
 export function fuse(hitLists: SearchHit[][], query?: string): SearchHit[] {
   const byUrl = new Map<string, SearchHit>();
@@ -249,6 +289,11 @@ export async function webSearch(query: string): Promise<SearchResult> {
   engines.push({ name: 'wikipedia_opensearch', ok: wiki.hits.length > 0, message: wiki.warning });
   if (wiki.warning) warnings.push(`wikipedia: ${wiki.warning}`);
   if (wiki.hits.length) lists.push(wiki.hits);
+
+  const npm = await searchNpmRegistry(query);
+  engines.push({ name: 'npm_registry', ok: npm.hits.length > 0, message: npm.warning });
+  if (npm.warning) warnings.push(`npm: ${npm.warning}`);
+  if (npm.hits.length) lists.push(npm.hits);
 
   const hits = fuse(lists, query);
   return {
