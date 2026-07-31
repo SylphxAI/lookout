@@ -1,23 +1,16 @@
-# Publish status — Lookout
+# Publish status
 
 | Field | Value |
 | --- | --- |
 | Package | `@sylphx/lookout` |
-| Repo version | `0.1.0` |
-| Registry state | **not on npm (404)** |
-| npm auth in this environment | `ENEEDAUTH` (external credential blocker) |
+| Version | `0.1.1` |
+| Registry state | **published** |
+| Auth path | GitHub org secret `NPM_TOKEN` via `publish-npm-package.yml` |
 
-## In-repo readiness
-
-- CI/tests/release-gate green on tip
-- `npm pack --dry-run` produces a valid TS package (~23KB)
-- Live `npm publish` blocked only by missing `@sylphx` registry auth in this environment
-
-## Install until publish lands
+## Install
 
 ```bash
-git clone https://github.com/SylphxAI/lookout.git
-cd lookout
-bun install
-./bin/lookout doctor
+npm i -g @sylphx/lookout
 ```
+
+Git SSOT remains the product repository for source/release train.
