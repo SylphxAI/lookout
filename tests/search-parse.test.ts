@@ -54,3 +54,20 @@ describe('normalizeResultUrl', () => {
     expect(normalizeResultUrl('https://example.com/x')).toBe('https://example.com/x');
   });
 });
+
+describe('fuse host diversity', () => {
+  test('soft-penalizes repeated hostnames', () => {
+    const a = [
+      { title: '1', url: 'https://example.com/a', snippet: '', engine: 't', score: 0.9, scoreExplain: [] as string[] },
+      { title: '2', url: 'https://example.com/b', snippet: '', engine: 't', score: 0.85, scoreExplain: [] as string[] },
+      { title: '3', url: 'https://other.com/c', snippet: '', engine: 't', score: 0.8, scoreExplain: [] as string[] },
+    ];
+    const fused = fuse([a]);
+    const other = fused.find((h) => h.url.includes('other.com'));
+    const secondExample = fused.find((h) => h.url.endsWith('/b'));
+    expect(other).toBeTruthy();
+    expect(secondExample).toBeTruthy();
+    // after penalty, other.com can rise above second example.com hit
+    expect((other?.score ?? 0) >= (secondExample?.score ?? 0)).toBe(true);
+  });
+});

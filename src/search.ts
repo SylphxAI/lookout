@@ -150,6 +150,15 @@ async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warn
   }
 }
 
+export function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
+}
+
+/** Fuse multi-engine hits: URL dedupe, multi-engine boost, host diversity soft penalty. */
 export function fuse(hitLists: SearchHit[][]): SearchHit[] {
   const byUrl = new Map<string, SearchHit>();
   for (const list of hitLists) {
@@ -166,7 +175,20 @@ export function fuse(hitLists: SearchHit[][]): SearchHit[] {
       }
     }
   }
-  return [...byUrl.values()].sort((a, b) => b.score - a.score).slice(0, 12);
+  const ranked = [...byUrl.values()].sort((a, b) => b.score - a.score);
+  const hostCount = new Map<string, number>();
+  for (const hit of ranked) {
+    const host = hostnameOf(hit.url);
+    const n = hostCount.get(host) ?? 0;
+    if (n > 0) {
+      // Soft demote repeated hosts so top-N is less mono-site.
+      const penalty = Math.min(0.25, 0.08 * n);
+      hit.score = Math.max(0.01, hit.score - penalty);
+      hit.scoreExplain.push(`host_diversity_penalty=${penalty.toFixed(2)}`);
+    }
+    hostCount.set(host, n + 1);
+  }
+  return ranked.sort((a, b) => b.score - a.score).slice(0, 12);
 }
 
 export async function webSearch(query: string): Promise<SearchResult> {
