@@ -19,3 +19,16 @@ describe('parseRobotsTxt', () => {
     expect(parseRobotsTxt(body, '/any').allowed).toBe(false);
   });
 });
+
+
+  test('longer Allow overrides shorter Disallow', () => {
+    const body = `User-agent: *\nDisallow: /private\nAllow: /private/public\n`;
+    const d = parseRobotsTxt(body, '/private/public/doc');
+    expect(d.allowed).toBe(true);
+    expect(String(d.matchedRule)).toMatch(/Allow/i);
+  });
+
+  test('Disallow still blocks when no Allow match', () => {
+    const body = `User-agent: *\nDisallow: /private\nAllow: /private/public\n`;
+    expect(parseRobotsTxt(body, '/private/secret').allowed).toBe(false);
+  });
