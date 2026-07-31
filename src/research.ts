@@ -1,5 +1,5 @@
-import { webSearch, type SearchHit } from './search.ts';
-import { webFetch } from './fetch.ts';
+import { webSearch, type SearchHit, type SearchResult } from './search.ts';
+import { webFetch, type FetchResult } from './fetch.ts';
 import { extractFromHtml } from './extract.ts';
 
 export type ResearchPage = {
@@ -23,13 +23,20 @@ export type ResearchResult = {
   route: string;
 };
 
+export type ResearchDeps = {
+  searchFn?: (query: string) => Promise<SearchResult>;
+  fetchFn?: (url: string, options?: { maxBytes?: number }) => Promise<FetchResult>;
+};
+
 export async function webResearch(
   query: string,
-  options: { maxPages?: number; maxBytes?: number } = {},
+  options: { maxPages?: number; maxBytes?: number } & ResearchDeps = {},
 ): Promise<ResearchResult> {
   const maxPages = Math.min(Math.max(options.maxPages ?? 3, 1), 6);
   const maxBytes = options.maxBytes ?? 512_000;
-  const search = await webSearch(query);
+  const searchFn = options.searchFn ?? webSearch;
+  const fetchFn = options.fetchFn ?? webFetch;
+  const search = await searchFn(query);
   const warnings = [...(search.warnings ?? [])];
   const pages: ResearchPage[] = [];
 
@@ -43,9 +50,9 @@ export async function webResearch(
       warnings: [],
     };
     try {
-      const fetched = await webFetch(hit.url, { maxBytes });
-      if (!fetched.ok) {
-        page.warnings.push(fetched.error ?? 'fetch_failed');
+      const fetched = await fetchFn(hit.url, { maxBytes });
+      if (!fetched.ok || !fetched.body) {
+        page.warnings.push(fetched.message ?? fetched.code ?? 'fetch_failed');
         pages.push(page);
         continue;
       }
