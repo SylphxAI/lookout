@@ -33,6 +33,21 @@ describe('extract', () => {
     expect(r.route).toBe('html_main');
     expect(r.textExcerpt).toContain('Body text for agents');
   });
+
+  test('extracts canonical author og site metadata', () => {
+    const rich = `<!doctype html><html><head>
+<title>T</title>
+<link rel="canonical" href="https://example.com/canon" />
+<meta name="author" content="Ada" />
+<meta property="og:site_name" content="Example Site" />
+<meta property="og:title" content="OG Title" />
+</head><body><main><p>Enough body content for the main content route preference path in extract.</p></main></body></html>`;
+    const r = extractFromHtml(rich, 'https://example.com/x');
+    expect(r.canonicalUrl).toBe('https://example.com/canon');
+    expect(r.author).toBe('Ada');
+    expect(r.siteName).toBe('Example Site');
+    expect(r.spans.some((s) => s.kind === 'canonical')).toBe(true);
+  });
 });
 
 describe('cache', () => {

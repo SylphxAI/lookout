@@ -10,6 +10,9 @@ export type ExtractResult = {
   url?: string;
   title?: string;
   description?: string;
+  canonicalUrl?: string;
+  author?: string;
+  siteName?: string;
   textExcerpt?: string;
   headings: { level: number; text: string }[];
   links: { href: string; text: string }[];
@@ -61,7 +64,7 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
   const warnings: string[] = [];
   const spans: CiteSpan[] = [];
   const titleMatch = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  const title = titleMatch ? decodeBasicEntities(stripTags(titleMatch[1] ?? '')) : undefined;
+  let title = titleMatch ? decodeBasicEntities(stripTags(titleMatch[1] ?? '')) : undefined;
   if (title && titleMatch && titleMatch.index !== undefined) {
     const raw = titleMatch[1] ?? '';
     const start = titleMatch.index + titleMatch[0].indexOf(raw);
@@ -82,6 +85,57 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
         kind: 'meta_description',
       });
     }
+  }
+
+  const ogTitle =
+    html.match(/<meta[^>]+property=["']og:title["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:title["'][^>]*>/i);
+  if (ogTitle?.[1] && !title) {
+    title = decodeBasicEntities(stripTags(ogTitle[1]));
+    spans.push({ text: title, start: ogTitle.index ?? 0, end: (ogTitle.index ?? 0) + ogTitle[0].length, kind: 'og_title' });
+  } else if (ogTitle?.[1] && title && title !== decodeBasicEntities(stripTags(ogTitle[1]))) {
+    spans.push({
+      text: decodeBasicEntities(stripTags(ogTitle[1])),
+      start: ogTitle.index ?? 0,
+      end: (ogTitle.index ?? 0) + ogTitle[0].length,
+      kind: 'og_title',
+    });
+  }
+
+  let canonicalUrl: string | undefined;
+  const canonical =
+    html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i) ||
+    html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*>/i);
+  if (canonical?.[1]) {
+    canonicalUrl = decodeBasicEntities(canonical[1].trim());
+    spans.push({
+      text: canonicalUrl,
+      start: canonical.index ?? 0,
+      end: (canonical.index ?? 0) + canonical[0].length,
+      kind: 'canonical',
+    });
+  }
+
+  let author: string | undefined;
+  const authorMeta =
+    html.match(/<meta[^>]+name=["']author["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']author["'][^>]*>/i);
+  if (authorMeta?.[1]) {
+    author = decodeBasicEntities(stripTags(authorMeta[1]));
+    spans.push({
+      text: author,
+      start: authorMeta.index ?? 0,
+      end: (authorMeta.index ?? 0) + authorMeta[0].length,
+      kind: 'author',
+    });
+  }
+
+  let siteName: string | undefined;
+  const siteMeta =
+    html.match(/<meta[^>]+property=["']og:site_name["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:site_name["'][^>]*>/i);
+  if (siteMeta?.[1]) {
+    siteName = decodeBasicEntities(stripTags(siteMeta[1]));
   }
 
   const jsonLd: unknown[] = [];
@@ -164,6 +218,9 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     url,
     title,
     description,
+    canonicalUrl,
+    author,
+    siteName,
     textExcerpt,
     headings,
     links,
