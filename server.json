@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.SylphxAI/lookout",
+  "title": "Lookout",
+  "description": "Local-first web instrument for agents: search, fetch, extract, cache. No required API key. SDK · CLI · MCP.",
+  "repository": {
+    "url": "https://github.com/SylphxAI/lookout",
+    "source": "github"
+  },
+  "version": "0.1.0",
+  "websiteUrl": "https://github.com/SylphxAI/lookout#readme",
+  "packages": [
+    {
+      "registryType": "npm",
+      "identifier": "@sylphx/lookout",
+      "version": "0.1.0",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}
