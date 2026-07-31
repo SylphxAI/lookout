@@ -1,30 +1,23 @@
-# Publish status
+# Publish status — Lookout
 
 | Field | Value |
 | --- | --- |
 | Package | `@sylphx/lookout` |
 | Repo version | `0.1.0` |
-| Registry state | **not_on_registry** |
-| npm auth in this environment | `ENEEDAUTH` (cannot live-publish here) |
+| Registry state | **not on npm (404)** |
+| npm auth in this environment | `ENEEDAUTH` (external credential blocker) |
 
-## Install paths
+## In-repo readiness
 
-### npm (when published)
+- CI/tests/release-gate green on tip
+- `npm pack --dry-run` produces a valid TS package (~23KB)
+- Live `npm publish` blocked only by missing `@sylphx` registry auth in this environment
 
-```bash
-npm i -g @sylphx/lookout
-```
-
-### Git (always available; product SSOT)
+## Install until publish lands
 
 ```bash
 git clone https://github.com/SylphxAI/lookout.git
 cd lookout
 bun install
+./bin/lookout doctor
 ```
-
-### Residual
-
-Live `npm publish` for unpublished packages requires `@sylphx` automation token / 2FA on a trusted publisher machine. That is an **external credential blocker**, not a product design gap.
-
-See also [BRAND_PUBLISH.md](./BRAND_PUBLISH.md) when present.
