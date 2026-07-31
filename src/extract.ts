@@ -13,6 +13,7 @@ export type ExtractResult = {
   canonicalUrl?: string;
   author?: string;
   siteName?: string;
+  language?: string;
   textExcerpt?: string;
   headings: { level: number; text: string }[];
   links: { href: string; text: string }[];
@@ -81,6 +82,12 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     spans.push({ text: title, start, end: start + raw.length, kind: 'title' });
   }
 
+  let language: string | undefined;
+  const langMatch = html.match(/<html\b[^>]*\blang=["']([^"']+)["'][^>]*>/i);
+  if (langMatch?.[1]) {
+    language = langMatch[1].trim();
+  }
+
   let description: string | undefined;
   const metaDesc =
     html.match(/<meta[^>]+name=["']description["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
@@ -93,6 +100,21 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
         start: metaDesc.index,
         end: metaDesc.index + metaDesc[0].length,
         kind: 'meta_description',
+      });
+    }
+  }
+
+  if (!description) {
+    const ogDesc =
+      html.match(/<meta[^>]+property=["']og:description["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+      html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:description["'][^>]*>/i);
+    if (ogDesc?.[1]) {
+      description = decodeBasicEntities(stripTags(ogDesc[1]));
+      spans.push({
+        text: description,
+        start: ogDesc.index ?? 0,
+        end: (ogDesc.index ?? 0) + ogDesc[0].length,
+        kind: 'og_description',
       });
     }
   }
@@ -239,6 +261,7 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     canonicalUrl,
     author,
     siteName,
+    language,
     textExcerpt,
     headings,
     links,

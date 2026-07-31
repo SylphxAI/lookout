@@ -155,3 +155,15 @@ describe('relative links', () => {
     expect(r.links.some((l) => l.href === 'https://example.com/abs')).toBe(true);
   });
 });
+
+describe('lang and og:description', () => {
+  test('reads html lang and og:description fallback', () => {
+    const html = `<!doctype html><html lang="en-US"><head>
+<meta property="og:description" content="OG desc for agents" />
+</head><body><main><p>Body content long enough for main preference path in extractors here.</p></main></body></html>`;
+    const r = extractFromHtml(html, 'https://example.com');
+    expect(r.language).toBe('en-US');
+    expect(r.description).toContain('OG desc');
+    expect(r.spans.some((s) => s.kind === 'og_description')).toBe(true);
+  });
+});
