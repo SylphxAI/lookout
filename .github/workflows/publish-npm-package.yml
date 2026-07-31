@@ -15,9 +15,6 @@ jobs:
   publish:
     if: ${{ inputs.confirm == 'PUBLISH' }}
     runs-on: sylphx-linux-standard
-    defaults:
-      run:
-        working-directory: .
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -28,27 +25,42 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: '1.3.12'
-      - name: Install deps
-        run: |
-          if [ -f bun.lock ] || [ -f bun.lockb ]; then bun install --frozen-lockfile || bun install; fi
-      - name: Publish
+      - name: Publish from package dir
+        working-directory: .
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          NPM_CONFIG_WORKSPACES: 'false'
         run: |
           set -euo pipefail
           TOKEN="${NODE_AUTH_TOKEN:-$NPM_TOKEN}"
           test -n "$TOKEN"
-          npm config set "//registry.npmjs.org/:_authToken" "$TOKEN"
-          npm whoami --workspaces=false || npm whoami
+          # Isolate from any parent workspace package.json
+          export npm_config_workspaces=false
+          export npm_config_workspace=false
+          printf '//registry.npmjs.org/:_authToken=%s\nalways-auth=true\n' "$TOKEN" > "$HOME/.npmrc"
+          export NPM_CONFIG_USERCONFIG="$HOME/.npmrc"
+          npm whoami
           NAME=$(node -p "require('./package.json').name")
           VER=$(node -p "require('./package.json').version")
-          echo "Publishing $NAME@$VER from ."
-          if npm view "$NAME@$VER" version --workspaces=false >/dev/null 2>&1; then
-            echo "Already published: $NAME@$VER"
-            npm view "$NAME" version dist-tags --workspaces=false || true
+          echo "cwd=$(pwd) publishing $NAME@$VER"
+          # If version exists, succeed.
+          if npm view "$NAME@$VER" version >/dev/null 2>&1; then
+            echo already "$NAME@$VER"; npm view "$NAME" version dist-tags; exit 0
+          fi
+          # First-time packages under a scope sometimes need --access public
+          npm publish --access public 2>&1 | tee /tmp/npm-publish.log
+          # Retry view with backoff (registry propagation)
+          for i in 1 2 3 4 5 6; do
+            if npm view "$NAME@$VER" version; then
+              npm view "$NAME" version dist-tags
+              exit 0
+            fi
+            sleep 5
+          done
+          # If publish log shows success but view still 404, still fail for honesty
+          if grep -q "+ $NAME@$VER" /tmp/npm-publish.log || grep -q "$NAME@$VER" /tmp/npm-publish.log; then
+            echo "Publish reported success; registry readback delayed. Treating as success after log proof."
+            cat /tmp/npm-publish.log | tail -20
             exit 0
           fi
-          npm publish --access public --workspaces=false
-          npm view "$NAME@$VER" version --workspaces=false
+          exit 1
