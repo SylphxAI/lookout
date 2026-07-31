@@ -32,6 +32,37 @@ export function decodeEntities(s: string): string {
     .replace(/<\/?b>/gi, '');
 }
 
+
+/** Unwrap DuckDuckGo redirect wrappers to the destination URL when present. */
+export function normalizeResultUrl(raw: string): string {
+  try {
+    const u = new URL(raw);
+    // ddg redirect: https://duckduckgo.com/l/?uddg=<encoded>
+    const uddg = u.searchParams.get('uddg');
+    if (uddg) {
+      try {
+        return decodeURIComponent(uddg);
+      } catch {
+        return uddg;
+      }
+    }
+    // some lite results use //duckduckgo.com/l/?kh=-1&uddg=
+    if (u.hostname.includes('duckduckgo.com') && u.pathname.startsWith('/l/')) {
+      const q = u.searchParams.get('uddg');
+      if (q) {
+        try {
+          return decodeURIComponent(q);
+        } catch {
+          return q;
+        }
+      }
+    }
+    return raw;
+  } catch {
+    return raw;
+  }
+}
+
 export function parseDuckDuckGoHtml(html: string): SearchHit[] {
   const hits: SearchHit[] = [];
   // classic HTML result blocks
@@ -39,7 +70,7 @@ export function parseDuckDuckGoHtml(html: string): SearchHit[] {
     /<a[^>]+class="[^"]*result__a[^"]*"[^>]+href="([^"]+)"[^>]*>([\s\S]*?)<\/a>[\s\S]*?(?:class="[^"]*result__snippet[^"]*"[^>]*>([\s\S]*?)<\/(?:a|td|div)>|)/gi;
   let m: RegExpExecArray | null;
   while ((m = re.exec(html)) !== null) {
-    const url = decodeEntities(m[1] ?? '');
+    const url = normalizeResultUrl(decodeEntities(m[1] ?? ''));
     const title = decodeEntities((m[2] ?? '').replace(/<[^>]+>/g, '')).trim();
     const snippet = decodeEntities((m[3] ?? '').replace(/<[^>]+>/g, '')).trim();
     if (!url.startsWith('http') || !title) continue;
@@ -57,7 +88,7 @@ export function parseDuckDuckGoHtml(html: string): SearchHit[] {
   if (hits.length === 0) {
     const liteRe = /<a[^>]+rel="nofollow"[^>]+href="(https?:\/\/[^"]+)"[^>]*>([\s\S]*?)<\/a>/gi;
     while ((m = liteRe.exec(html)) !== null) {
-      const url = decodeEntities(m[1] ?? '');
+      const url = normalizeResultUrl(decodeEntities(m[1] ?? ''));
       const title = decodeEntities((m[2] ?? '').replace(/<[^>]+>/g, '')).trim();
       if (!title || title.length < 2) continue;
       if (url.includes('duckduckgo.com')) continue;

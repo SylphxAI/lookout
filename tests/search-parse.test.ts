@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
   fuse,
+  normalizeResultUrl,
   parseDuckDuckGoHtml,
   parseWikipediaOpensearch,
 } from '../src/search.ts';
@@ -39,5 +40,17 @@ describe('search parsers (offline)', () => {
     const urls = new Set(fused.map((h) => h.url));
     expect(urls.size).toBe(fused.length);
     expect(fused[0]?.score).toBeGreaterThanOrEqual(fused[fused.length - 1]?.score ?? 0);
+  });
+});
+
+describe('normalizeResultUrl', () => {
+  test('unwraps duckduckgo uddg redirect', () => {
+    const raw =
+      'https://duckduckgo.com/l/?uddg=https%3A%2F%2Fexample.com%2Fdocs&rut=abc';
+    expect(normalizeResultUrl(raw)).toBe('https://example.com/docs');
+  });
+
+  test('passes through plain https', () => {
+    expect(normalizeResultUrl('https://example.com/x')).toBe('https://example.com/x');
   });
 });
