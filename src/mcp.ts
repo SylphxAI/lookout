@@ -91,6 +91,7 @@ server.tool(
     maxDepth: z.number().int().min(0).max(3).optional(),
     maxPages: z.number().int().min(1).max(25).optional(),
     respectRobots: z.boolean().optional().describe('Honor robots.txt User-agent: * Disallow (default true)'),
+    useSitemap: z.boolean().optional().describe('If true, seed same-origin URLs from /sitemap.xml'),
   },
   async (args) => {
     const envelope = await engine.handle('web_crawl', args as Record<string, unknown>);

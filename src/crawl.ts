@@ -5,6 +5,7 @@ import { webFetch } from './fetch.ts';
 import { assertSafeUrl } from './ssrf.ts';
 import { decodeEntities } from './search.ts';
 import { checkRobotsAllowed } from './robots.ts';
+import { parseSitemapXml } from './sitemap.ts';
 
 export type CrawlPage = {
   url: string;
@@ -71,7 +72,7 @@ function extractLinks(html: string, base: string): string[] {
 
 export async function webCrawl(
   seed: string,
-  options: { maxDepth?: number; maxPages?: number; respectRobots?: boolean } = {},
+  options: { maxDepth?: number; maxPages?: number; respectRobots?: boolean; useSitemap?: boolean } = {},
 ): Promise<CrawlResult> {
   const maxDepth = Math.min(options.maxDepth ?? 1, 3);
   const maxPages = Math.min(options.maxPages ?? 10, 25);
@@ -110,6 +111,33 @@ export async function webCrawl(
   const queue: { url: string; depth: number }[] = [{ url: seedCheck.url.toString(), depth: 0 }];
   const seen = new Set<string>();
   const pages: CrawlPage[] = [];
+
+  if (options.useSitemap) {
+    const sitemapUrl = `${origin}/sitemap.xml`;
+    try {
+      const sm = await webFetch(sitemapUrl, { timeoutMs: 8_000, maxBytes: 500_000 });
+      if (sm.ok && sm.body) {
+        const locs = parseSitemapXml(sm.body, Math.max(0, maxPages - 1));
+        let added = 0;
+        for (const loc of locs) {
+          try {
+            const u = new URL(loc);
+            if (u.origin === origin) {
+              queue.push({ url: u.toString(), depth: 0 });
+              added += 1;
+            }
+          } catch {
+            // ignore
+          }
+        }
+        warnings.push(`sitemap.xml seeded ${added} same-origin URLs`);
+      } else {
+        warnings.push(`sitemap.xml unavailable (${sm.message ?? sm.code ?? sm.status})`);
+      }
+    } catch (e) {
+      warnings.push(e instanceof Error ? e.message : 'sitemap_fetch_error');
+    }
+  }
 
   while (queue.length && pages.length < maxPages) {
     const { url, depth } = queue.shift()!;

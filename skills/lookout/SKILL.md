@@ -23,7 +23,7 @@ npx @sylphx/lookout
 | `web_fetch` | SSRF-safe fetch + body prefix spans |
 | `web_extract` | Title, headings, links, tables, canonical/author/og, main/json route |
 | `web_cache` | query/stats/clear/**prune** |
-| `web_crawl` *(advanced)* | Same-origin crawl + title/description/textExcerpt; **robots.txt** honor (default) |
+| `web_crawl` *(advanced)* | Same-origin crawl + excerpts; robots honor; optional **useSitemap** |
 | `web_research` *(advanced)* | Search then extract top pages with evidence |
 
 ## Environment
