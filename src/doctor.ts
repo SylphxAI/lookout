@@ -35,6 +35,13 @@ export function runDoctor(version = '0.1.0'): DoctorReport {
     status: 'ok',
     message: ua ? `LOOKOUT_USER_AGENT set (${ua.slice(0, 48)})` : 'LOOKOUT_USER_AGENT unset (default Lookout UA)',
   });
+  const fetchTimeout = process.env.LOOKOUT_FETCH_TIMEOUT_MS?.trim();
+  const fetchMax = process.env.LOOKOUT_FETCH_MAX_BYTES?.trim();
+  checks.push({
+    name: 'fetch_limits_env',
+    status: 'ok',
+    message: `timeout=${fetchTimeout || 'default'} maxBytes=${fetchMax || 'default'}`,
+  });
   const ssrf = assertSafeUrl('http://127.0.0.1/');
   checks.push({
     name: 'ssrf_blocks_loopback',

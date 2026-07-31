@@ -79,6 +79,8 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 | `LOOKOUT_CACHE_MAX_AGE_MS` | Optional max age for search/fetch cache hits |
 | `LOOKOUT_LIVE=1` | Enable optional live network tests |
 | `LOOKOUT_USER_AGENT` | Optional User-Agent override for fetch |
+| `LOOKOUT_FETCH_TIMEOUT_MS` | Optional fetch timeout (ms) |
+| `LOOKOUT_FETCH_MAX_BYTES` | Optional max response body bytes |
 
 ## Safety
 

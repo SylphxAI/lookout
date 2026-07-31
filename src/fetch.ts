@@ -26,8 +26,14 @@ export async function webFetch(
   const warnings: string[] = [];
   const redirects: string[] = [];
   let current = rawUrl;
-  const maxBytes = options.maxBytes ?? DEFAULT_MAX_BYTES;
-  const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
+  const envMax = process.env.LOOKOUT_FETCH_MAX_BYTES?.trim();
+  const envTimeout = process.env.LOOKOUT_FETCH_TIMEOUT_MS?.trim();
+  const maxBytes =
+    options.maxBytes ??
+    (envMax && Number.isFinite(Number(envMax)) ? Number(envMax) : DEFAULT_MAX_BYTES);
+  const timeoutMs =
+    options.timeoutMs ??
+    (envTimeout && Number.isFinite(Number(envTimeout)) ? Number(envTimeout) : DEFAULT_TIMEOUT_MS);
   const ua =
     options.userAgent ??
     process.env.LOOKOUT_USER_AGENT?.trim() ??
