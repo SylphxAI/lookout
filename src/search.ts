@@ -7,6 +7,7 @@ import { webFetch } from './fetch.ts';
 export type SearchHit = {
   title: string;
   url: string;
+  host?: string;
   snippet: string;
   engine: string;
   score: number;
@@ -30,6 +31,14 @@ export function decodeEntities(s: string): string {
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
     .replace(/<\/?b>/gi, '');
+}
+
+export function hostnameOf(url: string): string {
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return '';
+  }
 }
 
 
@@ -77,6 +86,7 @@ export function parseDuckDuckGoHtml(html: string): SearchHit[] {
     hits.push({
       title,
       url,
+      host: hostnameOf(url),
       snippet,
       engine: 'duckduckgo_html',
       score: Math.max(0.1, 1 - hits.length * 0.05),
@@ -95,6 +105,7 @@ export function parseDuckDuckGoHtml(html: string): SearchHit[] {
       hits.push({
         title,
         url,
+        host: hostnameOf(url),
         snippet: '',
         engine: 'duckduckgo_lite',
         score: Math.max(0.1, 1 - hits.length * 0.05),
@@ -128,6 +139,7 @@ export function parseWikipediaOpensearch(body: string): SearchHit[] {
     .map((title, i) => ({
       title,
       url: urls[i] ?? '',
+      host: hostnameOf(urls[i] ?? ''),
       snippet: snippets[i] ?? '',
       engine: 'wikipedia_opensearch',
       score: Math.max(0.05, 0.7 - i * 0.08),
@@ -147,14 +159,6 @@ async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warn
     return { hits };
   } catch {
     return { hits: [], warning: 'wikipedia_parse_error' };
-  }
-}
-
-export function hostnameOf(url: string): string {
-  try {
-    return new URL(url).hostname.replace(/^www\./, '');
-  } catch {
-    return '';
   }
 }
 

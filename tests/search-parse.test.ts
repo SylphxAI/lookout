@@ -19,6 +19,7 @@ describe('search parsers (offline)', () => {
     expect(hits[0]?.title).toContain('Model Context Protocol');
     expect(hits[0]?.engine).toBe('duckduckgo_html');
     expect(hits[0]?.scoreExplain.length).toBeGreaterThan(0);
+    expect(hits[0]?.host).toBeTruthy();
   });
 
   test('parses wikipedia opensearch json', () => {
