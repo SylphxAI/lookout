@@ -1,0 +1,5 @@
+#!/usr/bin/env bash
+set -euo pipefail
+echo "Lookout scaffold — Phase 1 engine not implemented yet." >&2
+echo "See docs in architecture-reader-mcp: docs/portfolio/specs/lookout-product-spec-v0.md" >&2
+exit 1

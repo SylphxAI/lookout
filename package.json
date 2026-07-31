@@ -1,0 +1,22 @@
+{
+  "name": "@sylphx/lookout",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Lookout — local-first web instrument for agents (Sylphx Instruments). Scaffold.",
+  "type": "module",
+  "license": "MIT",
+  "bin": {
+    "lookout": "./bin/lookout"
+  },
+  "exports": {
+    ".": "./src/sdk.ts",
+    "./sdk": "./src/sdk.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
