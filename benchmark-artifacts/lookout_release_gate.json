@@ -1,0 +1,52 @@
+{
+  "profile": "lookout_release_gate",
+  "generated_at": "2026-07-31T17:12:03.956Z",
+  "status": "passed",
+  "summary": {
+    "total": 8,
+    "passed": 8,
+    "failed": 0
+  },
+  "checks": [
+    {
+      "id": "core_tools_count",
+      "status": "passed",
+      "message": "core=web_search,web_fetch,web_extract,web_cache"
+    },
+    {
+      "id": "advanced_tools",
+      "status": "passed",
+      "message": "advanced=web_crawl,web_research"
+    },
+    {
+      "id": "ssrf_loopback_denied",
+      "status": "passed",
+      "message": "loopback denied"
+    },
+    {
+      "id": "extract_main_route",
+      "status": "passed",
+      "message": "route=html_main"
+    },
+    {
+      "id": "extract_heading",
+      "status": "passed",
+      "message": "has h1"
+    },
+    {
+      "id": "ddg_unwrap",
+      "status": "passed",
+      "message": "https://example.com/x"
+    },
+    {
+      "id": "research_requires_query",
+      "status": "passed",
+      "message": "INVALID_INPUT"
+    },
+    {
+      "id": "doctor_ok",
+      "status": "passed",
+      "message": "doctor ok"
+    }
+  ]
+}

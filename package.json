@@ -14,16 +14,20 @@
     "./engine": "./src/engine.ts"
   },
   "files": [
-    "bin",
-    "src",
+    "LICENSE",
     "README.md",
-    "LICENSE"
+    "bin",
+    "docs",
+    "server.json",
+    "src"
   ],
   "scripts": {
     "test": "bun test",
     "start": "bun src/cli.ts",
     "mcp": "bun src/mcp.ts",
-    "doctor": "./bin/lookout doctor"
+    "doctor": "./bin/lookout doctor",
+    "benchmark:release-gate": "bun scripts/release-gate.ts",
+    "validate": "bun test && bun scripts/release-gate.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -45,5 +49,8 @@
     "lookout",
     "sylphx",
     "agent"
-  ]
+  ],
+  "publishConfig": {
+    "access": "public"
+  }
 }
