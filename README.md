@@ -24,6 +24,7 @@ bun install
 ./bin/lookout fetch https://example.com
 ./bin/lookout extract https://example.com
 ./bin/lookout cache stats
+./bin/lookout crawl https://example.com --depth 0 --pages 2
 
 # MCP (stdio)
 bun src/mcp.ts
@@ -49,6 +50,7 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 | `web_fetch` | SSRF-safe HTTP(S) fetch, redirects, size limits, cite spans |
 | `web_extract` | Title, description, JSON-LD, tables, spans from HTML/URL |
 | `web_cache` | Local disk cache query/stats/clear (`LOOKOUT_CACHE_DIR` / `~/.cache/lookout`) |
+| `web_crawl` *(advanced)* | Same-origin, depth-limited crawl (not a full-site crawler) |
 
 ## Safety
 
@@ -58,9 +60,12 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 
 ## Family
 
-Citra · Iris · Cue · Prism · Spine · **Lookout**  
-SSOT: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/sylphx-instruments-ssot.md  
-Spec: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/specs/lookout-product-spec-v0.md
+Citra · Iris · Cue · Prism · Spine · **Lookout**
+
+Company portfolio knowledge (docs only — not a product monorepo):
+https://github.com/SylphxAI/instruments
+
+Lookout is an independent product repository. Sibling instruments are not vendored here.
 
 ## License
 
