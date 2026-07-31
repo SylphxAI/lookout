@@ -57,3 +57,56 @@ describe('web_research offline pipeline', () => {
     expect(result.pages[0]?.spans?.some((s) => s.kind === 'title' || s.kind === 'excerpt')).toBe(true);
   });
 });
+
+describe('web_research host filters', () => {
+  test('filters hits before fetch when hostsInclude set', async () => {
+    const { webResearch } = await import('../src/research.ts');
+    const result = await webResearch('anything', {
+      maxPages: 3,
+      hostsInclude: ['docs.example.com'],
+      searchFn: async () => ({
+        ok: true,
+        query: 'anything',
+        hits: [
+          {
+            title: 'keep',
+            url: 'https://docs.example.com/a',
+            host: 'docs.example.com',
+            snippet: '',
+            engine: 't',
+            score: 1,
+            scoreExplain: [],
+          },
+          {
+            title: 'drop',
+            url: 'https://other.com/b',
+            host: 'other.com',
+            snippet: '',
+            engine: 't',
+            score: 0.9,
+            scoreExplain: [],
+          },
+        ],
+        route: 'test',
+        warnings: [],
+        engines: [],
+      }),
+      fetchFn: async (url) => ({
+        ok: true,
+        url,
+        status: 200,
+        headers: {},
+        body: '<html><title>x</title><body><p>hello research</p></body></html>',
+        finalUrl: url,
+        redirects: [],
+        bytes: 50,
+        code: undefined,
+        message: undefined,
+      }),
+    });
+    expect(result.hits.length).toBe(1);
+    expect(result.hits[0]?.host).toBe('docs.example.com');
+    expect(result.warnings.some((w) => w.startsWith('host_filter'))).toBe(true);
+    expect(result.pages.length).toBe(1);
+  });
+});

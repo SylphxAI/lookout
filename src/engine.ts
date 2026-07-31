@@ -298,11 +298,29 @@ export class LookoutEngine {
       };
     }
     const maxPages = typeof input.maxPages === 'number' ? input.maxPages : undefined;
-    const result = await webResearch(query, { maxPages });
+    const hostsInclude = Array.isArray(input.hostsInclude)
+      ? input.hostsInclude.map(String)
+      : input.hostInclude
+        ? [String(input.hostInclude)]
+        : [];
+    const hostsExclude = Array.isArray(input.hostsExclude)
+      ? input.hostsExclude.map(String)
+      : input.hostExclude
+        ? [String(input.hostExclude)]
+        : [];
+    const result = await webResearch(query, {
+      maxPages,
+      hostsInclude: hostsInclude.length ? hostsInclude : undefined,
+      hostsExclude: hostsExclude.length ? hostsExclude : undefined,
+    });
     return {
       status: 'ok',
       tool: 'web_research',
-      answer: result,
+      answer: {
+        ...result,
+        hostsInclude: hostsInclude.length ? hostsInclude : undefined,
+        hostsExclude: hostsExclude.length ? hostsExclude : undefined,
+      },
       evidence: result.pages.flatMap((p) =>
         (p.spans ?? []).map((s) => ({ url: p.url, kind: s.kind, text: s.text })),
       ),

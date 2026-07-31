@@ -1,4 +1,4 @@
-import { webSearch, type SearchHit, type SearchResult } from './search.ts';
+import { webSearch, filterHitsByHosts, type SearchHit, type SearchResult } from './search.ts';
 import { webFetch, type FetchResult } from './fetch.ts';
 import { extractFromHtml } from './extract.ts';
 
@@ -30,7 +30,12 @@ export type ResearchDeps = {
 
 export async function webResearch(
   query: string,
-  options: { maxPages?: number; maxBytes?: number } & ResearchDeps = {},
+  options: {
+    maxPages?: number;
+    maxBytes?: number;
+    hostsInclude?: string[];
+    hostsExclude?: string[];
+  } & ResearchDeps = {},
 ): Promise<ResearchResult> {
   const maxPages = Math.min(Math.max(options.maxPages ?? 3, 1), 6);
   const maxBytes = options.maxBytes ?? 512_000;
@@ -38,9 +43,20 @@ export async function webResearch(
   const fetchFn = options.fetchFn ?? webFetch;
   const search = await searchFn(query);
   const warnings = [...(search.warnings ?? [])];
+  let hits = search.hits;
+  if ((options.hostsInclude?.length ?? 0) > 0 || (options.hostsExclude?.length ?? 0) > 0) {
+    const before = hits.length;
+    hits = filterHitsByHosts(hits, {
+      include: options.hostsInclude,
+      exclude: options.hostsExclude,
+    });
+    warnings.push(
+      `host_filter kept ${hits.length}/${before} for research (include=${(options.hostsInclude ?? []).join(',') || '*'}; exclude=${(options.hostsExclude ?? []).join(',') || 'none'})`,
+    );
+  }
   const pages: ResearchPage[] = [];
 
-  for (const hit of search.hits.slice(0, maxPages)) {
+  for (const hit of hits.slice(0, maxPages)) {
     const page: ResearchPage = {
       url: hit.url,
       title: hit.title,
@@ -74,7 +90,7 @@ export async function webResearch(
 
   return {
     query,
-    hits: search.hits,
+    hits,
     pages,
     warnings,
     route: 'search_then_extract',
