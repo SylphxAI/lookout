@@ -5,24 +5,37 @@ Use Lookout when agents need **search/fetch/extract with citeable spans** withou
 ## Install
 
 ```bash
-npx @sylphx/lookout          # MCP stdio (when published)
+npx @sylphx/lookout
 ./bin/lookout doctor
 ./bin/lookout search "model context protocol"
 ./bin/lookout fetch https://example.com
 ./bin/lookout extract https://example.com
 ./bin/lookout research "local-first agents" --pages 3
+./bin/lookout cache stats
+./bin/lookout cache prune
 ```
 
 ## Tools
 
 | Tool | Job |
 | --- | --- |
-| `web_search` | Public adapters (DDG HTML + Wikipedia), rank fusion |
+| `web_search` | Public adapters (DDG HTML + Wikipedia), rank fusion + host diversity |
 | `web_fetch` | SSRF-safe fetch + body prefix spans |
-| `web_extract` | Title, headings, links, tables, main-route text |
-| `web_cache` | Local cache query/stats/clear |
+| `web_extract` | Title, headings, links, tables, canonical/author/og, main/json route |
+| `web_cache` | query/stats/clear/**prune** |
 | `web_crawl` *(advanced)* | Same-origin depth-limited crawl |
 | `web_research` *(advanced)* | Search then extract top pages with evidence |
+
+## Environment
+
+| Var | Purpose |
+| --- | --- |
+| `LOOKOUT_CACHE_DIR` | Cache directory |
+| `LOOKOUT_CACHE_MAX_AGE_MS` | Max age for cache hits |
+| `LOOKOUT_USER_AGENT` | Fetch User-Agent |
+| `LOOKOUT_FETCH_TIMEOUT_MS` | Fetch timeout |
+| `LOOKOUT_FETCH_MAX_BYTES` | Max body bytes |
+| `LOOKOUT_LIVE=1` | Optional live tests |
 
 ## Evidence contract
 
