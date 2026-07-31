@@ -3,6 +3,7 @@
  */
 import { webFetch } from './fetch.ts';
 import { assertSafeUrl } from './ssrf.ts';
+import { decodeEntities } from './search.ts';
 
 export type CrawlPage = {
   url: string;
@@ -25,7 +26,7 @@ export type CrawlResult = {
 
 function extractTitle(html: string): string | undefined {
   const m = html.match(/<title[^>]*>([\s\S]*?)<\/title>/i);
-  return m ? m[1]?.replace(/<[^>]+>/g, '').trim() : undefined;
+  return m ? decodeEntities(m[1]?.replace(/<[^>]+>/g, '').trim() ?? '') : undefined;
 }
 
 function extractLinks(html: string, base: string): string[] {
