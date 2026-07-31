@@ -60,6 +60,16 @@ function pickContentHtml(html: string): { html: string; route: string } {
   return { html, route: 'html_dom_light' };
 }
 
+
+function resolveHref(href: string, base?: string): string {
+  try {
+    if (!base) return href;
+    return new URL(href, base).toString();
+  } catch {
+    return href;
+  }
+}
+
 export function extractFromHtml(html: string, url?: string): ExtractResult {
   const warnings: string[] = [];
   const spans: CiteSpan[] = [];
@@ -107,7 +117,7 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     html.match(/<link[^>]+rel=["']canonical["'][^>]+href=["']([^"']+)["'][^>]*>/i) ||
     html.match(/<link[^>]+href=["']([^"']+)["'][^>]+rel=["']canonical["'][^>]*>/i);
   if (canonical?.[1]) {
-    canonicalUrl = decodeBasicEntities(canonical[1].trim());
+    canonicalUrl = resolveHref(decodeBasicEntities(canonical[1].trim()), url);
     spans.push({
       text: canonicalUrl,
       start: canonical.index ?? 0,
@@ -190,9 +200,10 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
   const links: { href: string; text: string }[] = [];
   const aRe = /<a\b[^>]*href=["']([^"'#][^"']*)["'][^>]*>([\s\S]*?)<\/a>/gi;
   while ((m = aRe.exec(html)) !== null) {
-    const href = (m[1] ?? '').trim();
+    const rawHref = (m[1] ?? '').trim();
     const text = decodeBasicEntities(stripTags(m[2] ?? '')).slice(0, 200);
-    if (!href || href.startsWith('javascript:')) continue;
+    if (!rawHref || rawHref.startsWith('javascript:')) continue;
+    const href = resolveHref(rawHref, url);
     links.push({ href, text });
     if (links.length >= 40) break;
   }

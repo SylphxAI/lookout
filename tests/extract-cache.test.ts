@@ -139,3 +139,19 @@ describe('engine text extract', () => {
     expect(JSON.stringify(env.answer)).toContain('hello plain');
   });
 });
+
+describe('relative links', () => {
+  test('resolves relative links against page url', () => {
+    const html = `<!doctype html><html><head><title>R</title>
+<link rel="canonical" href="/canon" />
+</head><body><main>
+<p>Body content long enough for main preference path in extractors here.</p>
+<a href="/docs/a">A</a>
+<a href="https://example.com/abs">Abs</a>
+</main></body></html>`;
+    const r = extractFromHtml(html, 'https://example.com/page');
+    expect(r.canonicalUrl).toBe('https://example.com/canon');
+    expect(r.links.some((l) => l.href === 'https://example.com/docs/a')).toBe(true);
+    expect(r.links.some((l) => l.href === 'https://example.com/abs')).toBe(true);
+  });
+});
