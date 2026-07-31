@@ -303,6 +303,19 @@ export class LookoutEngine {
         route: 'cache',
       };
     }
+    if (op === 'prune') {
+      const maxAgeMs =
+        typeof input.maxAgeMs === 'number'
+          ? input.maxAgeMs
+          : this.cacheMaxAgeMs() ?? 86_400_000;
+      return {
+        status: 'ok',
+        tool: 'web_cache',
+        answer: { ...this.cache.pruneExpired(maxAgeMs), maxAgeMs },
+        warnings: [],
+        route: 'cache',
+      };
+    }
     const q = String(input.query ?? '');
     const limit = typeof input.limit === 'number' ? input.limit : 20;
     const results = this.cache.query(q, limit).map((r) => ({

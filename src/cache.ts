@@ -101,6 +101,27 @@ export class LookoutCache {
     }
     return { removed };
   }
+
+  /** Remove entries older than maxAgeMs. */
+  pruneExpired(maxAgeMs: number): { removed: number } {
+    let removed = 0;
+    const now = Date.now();
+    for (const name of readdirSync(this.dir)) {
+      if (!name.endsWith('.json')) continue;
+      try {
+        const rec = JSON.parse(readFileSync(join(this.dir, name), 'utf8')) as CacheRecord;
+        const created = Date.parse(rec.createdAt);
+        if (!Number.isFinite(created) || now - created > maxAgeMs) {
+          rmSync(join(this.dir, name), { force: true });
+          removed += 1;
+        }
+      } catch {
+        rmSync(join(this.dir, name), { force: true });
+        removed += 1;
+      }
+    }
+    return { removed };
+  }
 }
 
 export function cacheKey(parts: string[]): string {

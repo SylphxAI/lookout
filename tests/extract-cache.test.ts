@@ -75,6 +75,22 @@ describe('cache', () => {
     expect(c.get('old', { maxAgeMs: 1_000 })).toBeNull();
     rmSync(dir, { recursive: true, force: true });
   });
+
+  test('pruneExpired removes stale entries', () => {
+    const dir = mkdtempSync(join(tmpdir(), 'lookout-cache-prune-'));
+    const c = new LookoutCache(dir);
+    c.put({
+      key: 'old',
+      kind: 'fetch',
+      body: 'stale',
+      createdAt: new Date(Date.now() - 60_000).toISOString(),
+    });
+    c.put({ key: 'new', kind: 'fetch', body: 'fresh' });
+    expect(c.pruneExpired(1_000).removed).toBe(1);
+    expect(c.get('new')?.body).toBe('fresh');
+    expect(c.get('old')).toBeNull();
+    rmSync(dir, { recursive: true, force: true });
+  });
 });
 
 describe('engine extract without network', () => {

@@ -11,6 +11,7 @@ Usage:
   lookout cache [query]
   lookout cache stats
   lookout cache clear
+  lookout cache prune [maxAgeMs]
   lookout crawl <url> [--depth N] [--pages N]
   lookout research <query...> [--pages N]
   lookout mcp
@@ -19,7 +20,8 @@ Usage:
   lookout help
 
 Env:
-  LOOKOUT_CACHE_DIR   override cache directory (default: ~/.cache/lookout)
+  LOOKOUT_CACHE_DIR          override cache directory (default: ~/.cache/lookout)
+  LOOKOUT_CACHE_MAX_AGE_MS   optional max age for cache hits (milliseconds)
 `);
   process.exit(0);
 }
@@ -60,7 +62,10 @@ async function main() {
     case 'cache':
       if (rest[0] === 'stats') envelope = await engine.handle('web_cache', { op: 'stats' });
       else if (rest[0] === 'clear') envelope = await engine.handle('web_cache', { op: 'clear' });
-      else envelope = await engine.handle('web_cache', { op: 'query', query: rest.join(' ') });
+      else if (rest[0] === 'prune') {
+        const maxAgeMs = rest[1] ? Number(rest[1]) : undefined;
+        envelope = await engine.handle('web_cache', { op: 'prune', maxAgeMs });
+      } else envelope = await engine.handle('web_cache', { op: 'query', query: rest.join(' ') });
       break;
     case 'crawl': {
       let depth: number | undefined;

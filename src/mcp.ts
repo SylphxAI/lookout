@@ -68,10 +68,11 @@ server.tool(
   'web_cache',
   'Query, stats, or clear the local Lookout cache.',
   {
-    op: z.enum(['query', 'stats', 'clear']).optional(),
-    operation: z.enum(['query', 'stats', 'clear']).optional(),
+    op: z.enum(['query', 'stats', 'clear', 'prune']).optional(),
+    operation: z.enum(['query', 'stats', 'clear', 'prune']).optional(),
     query: z.string().optional(),
     limit: z.number().int().positive().optional(),
+    maxAgeMs: z.number().int().nonnegative().optional(),
   },
   async (args) => {
     const envelope = await engine.handle('web_cache', args as Record<string, unknown>);

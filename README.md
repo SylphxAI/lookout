@@ -71,6 +71,14 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 | `web_crawl` *(advanced)* | Same-origin, depth-limited crawl (not a full-site crawler) |
 | `web_research` *(advanced)* | Search then fetch/extract top pages with citeable excerpts |
 
+## Environment
+
+| Var | Purpose |
+| --- | --- |
+| `LOOKOUT_CACHE_DIR` | Cache directory (default `~/.cache/lookout`) |
+| `LOOKOUT_CACHE_MAX_AGE_MS` | Optional max age for search/fetch cache hits |
+| `LOOKOUT_LIVE=1` | Enable optional live network tests |
+
 ## Safety
 
 - Private IPv4/IPv6, localhost, link-local metadata hosts **denied**
