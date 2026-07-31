@@ -22,7 +22,7 @@ export type SearchResult = {
   engines: { name: string; ok: boolean; message?: string }[];
 };
 
-function decodeEntities(s: string): string {
+export function decodeEntities(s: string): string {
   return s
     .replace(/&amp;/g, '&')
     .replace(/&lt;/g, '<')
@@ -32,7 +32,7 @@ function decodeEntities(s: string): string {
     .replace(/<\/?b>/gi, '');
 }
 
-function parseDuckDuckGoHtml(html: string): SearchHit[] {
+export function parseDuckDuckGoHtml(html: string): SearchHit[] {
   const hits: SearchHit[] = [];
   // classic HTML result blocks
   const re =
@@ -88,6 +88,23 @@ async function searchDuckDuckGo(query: string): Promise<{ hits: SearchHit[]; war
   return { hits };
 }
 
+export function parseWikipediaOpensearch(body: string): SearchHit[] {
+  const data = JSON.parse(body) as [string, string[], string[], string[]];
+  const titles = data[1] ?? [];
+  const snippets = data[2] ?? [];
+  const urls = data[3] ?? [];
+  return titles
+    .map((title, i) => ({
+      title,
+      url: urls[i] ?? '',
+      snippet: snippets[i] ?? '',
+      engine: 'wikipedia_opensearch',
+      score: Math.max(0.05, 0.7 - i * 0.08),
+      scoreExplain: ['engine=wikipedia_opensearch', `rank=${i}`],
+    }))
+    .filter((h) => h.url.startsWith('http'));
+}
+
 async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warning?: string }> {
   const url = `https://en.wikipedia.org/w/api.php?action=opensearch&search=${encodeURIComponent(query)}&limit=5&namespace=0&format=json`;
   const res = await webFetch(url, { timeoutMs: 12_000 });
@@ -95,25 +112,14 @@ async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warn
     return { hits: [], warning: res.message ?? 'wikipedia_failed' };
   }
   try {
-    const data = JSON.parse(res.body) as [string, string[], string[], string[]];
-    const titles = data[1] ?? [];
-    const snippets = data[2] ?? [];
-    const urls = data[3] ?? [];
-    const hits: SearchHit[] = titles.map((title, i) => ({
-      title,
-      url: urls[i] ?? '',
-      snippet: snippets[i] ?? '',
-      engine: 'wikipedia_opensearch',
-      score: Math.max(0.05, 0.7 - i * 0.08),
-      scoreExplain: ['engine=wikipedia_opensearch', `rank=${i}`],
-    })).filter((h) => h.url.startsWith('http'));
+    const hits = parseWikipediaOpensearch(res.body);
     return { hits };
   } catch {
     return { hits: [], warning: 'wikipedia_parse_error' };
   }
 }
 
-function fuse(hitLists: SearchHit[][]): SearchHit[] {
+export function fuse(hitLists: SearchHit[][]): SearchHit[] {
   const byUrl = new Map<string, SearchHit>();
   for (const list of hitLists) {
     for (const hit of list) {
