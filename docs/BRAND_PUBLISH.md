@@ -1,36 +1,11 @@
-# Lookout — brand npm publish readiness
+# Lookout — brand npm publish
 
-**Publish authority:** this repository only (not a multi-product monorepo).
+**Publish authority:** this repository only.
 
 | Field | Value |
 | --- | --- |
 | Brand | **Lookout** |
-| Transitional npm id | `@sylphx/lookout` |
-| Target brand npm id | `@sylphx/lookout` |
-| Brand bin | `lookout` |
-| Marketplace title | Lookout (`server.json`) |
+| Canonical npm id | `@sylphx/lookout` |
+| Transitional id | _(none — shipped as brand from day one)_ |
 
-## Current policy
-
-1. Ship/publish `@sylphx/lookout` from this repo (existing CI/release train).
-2. Optional second publish of `@sylphx/lookout` **from this same repo** (same artifacts, renamed package.json at pack time).
-3. Never publish brand packages from any other repository.
-
-## Dry-run (no npm auth required)
-
-```bash
-# Transitional package as configured
-npm pack --dry-run
-# Or product-specific brand pack plan script when present:
-# bun scripts/brand-pack-plan.ts
-```
-
-## Blockers for live brand publish
-
-- npm automation token / 2FA for `@sylphx` scope
-- Changeset/version alignment with transitional package
-- Registry readback proof after publish
-
-## Authority
-
-Publish and brand packages only from **this repository**. No central Instruments monorepo.
+No dual-name expand required.
