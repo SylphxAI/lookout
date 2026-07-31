@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "project": {
+    "repo": "SylphxAI/lookout",
+    "name": "Lookout",
+    "lifecycle": "active",
+    "layer": "tooling",
+    "policyPool": "sylphx-skills",
+    "summary": "Local-first web instrument for agents: search, fetch, extract, cache with citeable excerpts. No required API key; tiny default install.",
+    "goals": [
+      "Local web search/fetch/extract/cache",
+      "SSRF-safe fetch",
+      "SDK/CLI/MCP surfaces"
+    ],
+    "nonGoals": [
+      "Multi-GB browser/model warmup as default",
+      "Paid search API as required path"
+    ],
+    "links": [
+      {
+        "type": "github",
+        "url": "https://github.com/SylphxAI/lookout",
+        "title": "Repo"
+      }
+    ]
+  }
+}
