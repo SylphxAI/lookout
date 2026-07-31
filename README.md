@@ -24,6 +24,21 @@ Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) — l
 
 Evidence is a **result contract** (spans, routes, warnings) — not a tool named `evidence_first`.
 
+## Install (30 seconds)
+
+```bash
+npm install -g @sylphx/lookout
+# brand bin
+lookout doctor
+lookout search "model context protocol"
+```
+
+Claude Code:
+
+```bash
+claude mcp add lookout -- npx @sylphx/lookout
+```
+
 ## Install (dev)
 
 ```bash

@@ -1,6 +1,7 @@
 import { LookoutCache, cacheKey, defaultCacheDir } from './cache.ts';
 import { extractFromHtml } from './extract.ts';
 import { webFetch } from './fetch.ts';
+import { checkRobotsAllowed } from './robots.ts';
 import { webSearch, filterHitsByHosts } from './search.ts';
 import { webCrawl } from './crawl.ts';
 import { webResearch } from './research.ts';
@@ -152,7 +153,8 @@ export class LookoutEngine {
       };
     }
     const useCache = input.useCache !== false;
-    const key = cacheKey(['fetch', url]);
+    const respectRobots = input.respectRobots === true; // default off for fetch (crawl defaults on)
+    const key = cacheKey(['fetch', url, respectRobots ? 'robots' : 'norobots']);
     if (useCache) {
       const cached = this.cache.get(key, { maxAgeMs: this.cacheMaxAgeMs() });
       if (cached) {
@@ -162,6 +164,19 @@ export class LookoutEngine {
           answer: { ...JSON.parse(cached.body), fromCache: true },
           warnings: ['served_from_cache'],
           route: 'cache',
+        };
+      }
+    }
+    if (respectRobots) {
+      const robots = await checkRobotsAllowed(url, { respectRobots: true });
+      if (!robots.allowed) {
+        return {
+          status: 'error',
+          tool: 'web_fetch',
+          warnings: [robots.warning ?? 'robots.txt disallow'],
+          code: 'ROBOTS_DISALLOW',
+          message: robots.warning ?? 'Blocked by robots.txt',
+          route: 'robots.txt',
         };
       }
     }

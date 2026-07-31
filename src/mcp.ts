@@ -45,6 +45,7 @@ server.tool(
     useCache: z.boolean().optional(),
     maxBytes: z.number().int().positive().optional(),
     timeoutMs: z.number().int().positive().optional(),
+    respectRobots: z.boolean().optional().describe('If true, honor robots.txt Disallow (default false for fetch)'),
   },
   async (args) => {
     const envelope = await engine.handle('web_fetch', args as Record<string, unknown>);
