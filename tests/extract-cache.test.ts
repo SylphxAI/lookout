@@ -73,3 +73,26 @@ describe('engine extract without network', () => {
     rmSync(dir, { recursive: true, force: true });
   });
 });
+
+describe('extract robots + json body', () => {
+  test('flags robots noindex', () => {
+    const html = `<!doctype html><html><head>
+<meta name="robots" content="noindex,nofollow" />
+<title>X</title></head><body><main><p>Body content long enough for main preference in extractor path here.</p></main></body></html>`;
+    const r = extractFromHtml(html);
+    expect(r.warnings).toContain('robots_noindex');
+  });
+});
+
+describe('engine json extract', () => {
+  test('extracts json body without html', async () => {
+    const eng = new LookoutEngine({ cacheDir: '/tmp/lookout-json-extract' });
+    const env = await eng.handle('web_extract', {
+      html: JSON.stringify({ hello: 'world', n: 1 }),
+      contentType: 'application/json',
+    });
+    expect(env.status).toBe('ok');
+    expect((env.answer as { route?: string }).route).toBe('json_body');
+    expect(JSON.stringify(env.answer)).toContain('hello');
+  });
+});

@@ -180,6 +180,39 @@ export class LookoutEngine {
         message: 'web_extract requires html or url',
       };
     }
+    // JSON bodies: light local extract without HTML DOM
+    const looksJson =
+      (typeof input.contentType === 'string' && input.contentType.includes('application/json')) ||
+      /^\s*[\[{]/.test(html);
+    if (looksJson && !/<html[\s>]/i.test(html) && !/<body[\s>]/i.test(html)) {
+      let parsed: unknown = null;
+      try {
+        parsed = JSON.parse(html);
+      } catch {
+        // keep as text
+      }
+      const text = typeof parsed === 'string' ? parsed : JSON.stringify(parsed ?? html).slice(0, 4000);
+      return {
+        status: 'ok',
+        tool: 'web_extract',
+        answer: {
+          ok: true,
+          url,
+          textExcerpt: text,
+          headings: [],
+          links: [],
+          jsonLd: parsed && typeof parsed === 'object' ? [parsed] : [],
+          tables: [],
+          spans: text
+            ? [{ text: text.slice(0, 240), start: 0, end: Math.min(240, text.length), kind: 'json_excerpt' }]
+            : [],
+          route: 'json_body',
+          warnings: parsed ? [] : ['json_parse_failed_used_raw_text'],
+        },
+        warnings: parsed ? [] : ['json_parse_failed_used_raw_text'],
+        route: 'json_body',
+      };
+    }
     const extracted = extractFromHtml(html, url);
     return {
       status: 'ok',

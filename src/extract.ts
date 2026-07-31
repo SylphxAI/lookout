@@ -210,6 +210,13 @@ export function extractFromHtml(html: string, url?: string): ExtractResult {
     warnings.push('empty_text_excerpt');
   }
 
+
+  const robots =
+    html.match(/<meta[^>]+name=["']robots["'][^>]+content=["']([^"']+)["'][^>]*>/i) ||
+    html.match(/<meta[^>]+content=["']([^"']+)["'][^>]+name=["']robots["'][^>]*>/i);
+  if (robots?.[1] && /noindex/i.test(robots[1])) {
+    warnings.push('robots_noindex');
+  }
   if (!title) warnings.push('missing_title');
   if (!description) warnings.push('missing_description');
 
