@@ -163,7 +163,7 @@ async function searchWikipedia(query: string): Promise<{ hits: SearchHit[]; warn
 }
 
 /** Fuse multi-engine hits: URL dedupe, multi-engine boost, host diversity soft penalty. */
-export function fuse(hitLists: SearchHit[][]): SearchHit[] {
+export function fuse(hitLists: SearchHit[][], query?: string): SearchHit[] {
   const byUrl = new Map<string, SearchHit>();
   for (const list of hitLists) {
     for (const hit of list) {
@@ -176,6 +176,25 @@ export function fuse(hitLists: SearchHit[][]): SearchHit[] {
       } else {
         prev.score = Math.min(1, prev.score + 0.05);
         prev.scoreExplain.push(`boost_from_${hit.engine}`);
+      }
+    }
+  }
+  const terms = (query ?? '')
+    .toLowerCase()
+    .split(/\s+/)
+    .map((t) => t.trim())
+    .filter((t) => t.length >= 2);
+  if (terms.length) {
+    for (const hit of byUrl.values()) {
+      const hay = `${hit.title} ${hit.snippet}`.toLowerCase();
+      let hits = 0;
+      for (const term of terms) {
+        if (hay.includes(term)) hits += 1;
+      }
+      if (hits > 0) {
+        const boost = Math.min(0.25, 0.08 * hits);
+        hit.score = Math.min(1.5, hit.score + boost);
+        hit.scoreExplain.push(`query_term_boost=${boost.toFixed(2)}`);
       }
     }
   }
@@ -214,7 +233,7 @@ export async function webSearch(query: string): Promise<SearchResult> {
   if (wiki.warning) warnings.push(`wikipedia: ${wiki.warning}`);
   if (wiki.hits.length) lists.push(wiki.hits);
 
-  const hits = fuse(lists);
+  const hits = fuse(lists, query);
   return {
     ok: hits.length > 0,
     query,

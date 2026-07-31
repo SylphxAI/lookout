@@ -83,3 +83,20 @@ describe('fuse host diversity', () => {
     expect((other?.score ?? 0) >= (secondExample?.score ?? 0)).toBe(true);
   });
 });
+
+describe('fuse query terms', () => {
+  test('boosts titles matching query terms', () => {
+    const fused = fuse(
+      [
+        [
+          { title: 'Unrelated page', url: 'https://a.com/1', snippet: '', engine: 't', score: 0.85, scoreExplain: [] as string[] },
+          { title: 'Local first agents guide', url: 'https://b.com/1', snippet: 'local', engine: 't', score: 0.8, scoreExplain: [] as string[] },
+        ],
+      ],
+      'local first agents',
+    );
+    const top = fused[0];
+    expect(top?.url).toContain('b.com');
+    expect(top?.scoreExplain.some((s) => s.startsWith('query_term_boost'))).toBe(true);
+  });
+});
