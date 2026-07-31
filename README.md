@@ -1,6 +1,6 @@
 # Lookout
 
-### The web from your machine. *(Sylphx Instruments)*
+### The web from your machine. 
 
 **Lookout** is a local-first **web instrument** for agents and apps: **search, fetch, extract, cache** with citeable excerpts — **no required API key**, **tiny default install**, same API on **SDK · CLI · MCP**.
 
@@ -108,10 +108,7 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 Citra · Iris · Cue · Prism · Spine · **Lookout**
 
 Company portfolio knowledge (docs only — not a product monorepo):
-https://github.com/SylphxAI/instruments
-
-Lookout is an independent product repository. Sibling instruments are not vendored here.
-
+This repository is product SSOT. Sibling agent tools are separate repositories and are not vendored here.
 ## License
 
 MIT

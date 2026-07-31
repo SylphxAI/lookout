@@ -2,7 +2,7 @@
 import { LookoutEngine, CORE_TOOLS, ADVANCED_TOOLS } from './engine.ts';
 
 function usage(): never {
-  console.log(`Lookout — local-first web instrument (Sylphx Instruments)
+  console.log(`Lookout — local-first web instrument (Sylphx)
 
 Usage:
   lookout search <query...>

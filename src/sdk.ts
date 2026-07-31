@@ -1,5 +1,5 @@
 /**
- * Lookout SDK — local-first web instrument (Sylphx Instruments).
+ * Lookout SDK — local-first web instrument (Sylphx).
  * Surfaces: SDK · CLI · MCP share LookoutEngine semantics.
  */
 import { LookoutEngine, type EngineOptions, type ToolEnvelope, CORE_TOOLS, ADVANCED_TOOLS } from './engine.ts';

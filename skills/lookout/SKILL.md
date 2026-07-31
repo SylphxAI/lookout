@@ -46,4 +46,7 @@ Results include routes, warnings, and cite spans. There is **no** `evidence_firs
 1. Default path: no required API key; cache on machine.
 2. Deny private/metadata hosts (SSRF policy).
 3. Prefer core tools first; advanced tools only when needed.
-4. Family knowledge: https://github.com/SylphxAI/instruments
+
+## Independence
+
+This repository is product SSOT. No central Instruments monorepo.
