@@ -65,6 +65,7 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 | `web_extract` | Title, description, JSON-LD, tables, spans from HTML/URL |
 | `web_cache` | Local disk cache query/stats/clear (`LOOKOUT_CACHE_DIR` / `~/.cache/lookout`) |
 | `web_crawl` *(advanced)* | Same-origin, depth-limited crawl (not a full-site crawler) |
+| `web_research` *(advanced)* | Search then fetch/extract top pages with citeable excerpts |
 
 ## Safety
 

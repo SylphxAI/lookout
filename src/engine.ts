@@ -3,11 +3,13 @@ import { extractFromHtml } from './extract.ts';
 import { webFetch } from './fetch.ts';
 import { webSearch } from './search.ts';
 import { webCrawl } from './crawl.ts';
+import { webResearch } from './research.ts';
 
 export type ToolEnvelope = {
   status: 'ok' | 'error';
   tool: string;
   answer?: unknown;
+  evidence?: unknown;
   warnings: string[];
   route?: string;
   code?: string;
@@ -35,6 +37,8 @@ export class LookoutEngine {
         return this.extract(input);
       case 'web_cache':
         return this.cacheTool(input);
+      case 'web_research':
+        return this.research(input);
       case 'web_crawl':
         return this.crawl(input);
       default:
@@ -187,6 +191,32 @@ export class LookoutEngine {
   }
 
 
+  
+  private async research(input: Record<string, unknown>): Promise<ToolEnvelope> {
+    const query = typeof input.query === 'string' ? input.query : Array.isArray(input.query) ? input.query.join(' ') : '';
+    if (!query.trim()) {
+      return {
+        status: 'error',
+        tool: 'web_research',
+        code: 'INVALID_INPUT',
+        message: 'web_research requires query',
+        warnings: [],
+      };
+    }
+    const maxPages = typeof input.maxPages === 'number' ? input.maxPages : undefined;
+    const result = await webResearch(query, { maxPages });
+    return {
+      status: 'ok',
+      tool: 'web_research',
+      answer: result,
+      evidence: result.pages.flatMap((p) =>
+        (p.spans ?? []).map((s) => ({ url: p.url, kind: s.kind, text: s.text })),
+      ),
+      warnings: result.warnings,
+      route: result.route,
+    };
+  }
+
   private async crawl(input: Record<string, unknown>): Promise<ToolEnvelope> {
     const url = String(input.url ?? input.seed ?? '');
     if (!url) {
@@ -254,4 +284,4 @@ export class LookoutEngine {
 }
 
 export const CORE_TOOLS = ['web_search', 'web_fetch', 'web_extract', 'web_cache'] as const;
-export const ADVANCED_TOOLS = ['web_crawl'] as const;
+export const ADVANCED_TOOLS = ['web_crawl', 'web_research'] as const;

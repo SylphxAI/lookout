@@ -1,5 +1,7 @@
 /**
- * Lookout MCP server — stdio tools: web_search, web_fetch, web_extract, web_cache
+ * Lookout MCP server — stdio tools:
+ * core: web_search, web_fetch, web_extract, web_cache
+ * advanced: web_crawl, web_research
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
@@ -50,7 +52,7 @@ server.tool(
 
 server.tool(
   'web_extract',
-  'Extract title, description, JSON-LD, tables, and cite spans from HTML or by URL.',
+  'Extract title, description, headings, links, JSON-LD, tables, and cite spans from HTML or by URL.',
   {
     url: z.string().url().optional(),
     html: z.string().optional(),
@@ -58,6 +60,21 @@ server.tool(
   },
   async (args) => {
     const envelope = await engine.handle('web_extract', args as Record<string, unknown>);
+    return textResult(envelope, envelope.status !== 'ok');
+  },
+);
+
+server.tool(
+  'web_cache',
+  'Query, stats, or clear the local Lookout cache.',
+  {
+    op: z.enum(['query', 'stats', 'clear']).optional(),
+    operation: z.enum(['query', 'stats', 'clear']).optional(),
+    query: z.string().optional(),
+    limit: z.number().int().positive().optional(),
+  },
+  async (args) => {
+    const envelope = await engine.handle('web_cache', args as Record<string, unknown>);
     return textResult(envelope, envelope.status !== 'ok');
   },
 );
@@ -77,16 +94,14 @@ server.tool(
 );
 
 server.tool(
-  'web_cache',
-  'Query, stats, or clear the local Lookout cache.',
+  'web_research',
+  'Advanced: search then fetch/extract top public pages with citeable excerpts (local-first, no API key).',
   {
-    op: z.enum(['query', 'stats', 'clear']).optional(),
-    operation: z.enum(['query', 'stats', 'clear']).optional(),
-    query: z.string().optional(),
-    limit: z.number().int().positive().optional(),
+    query: z.string().describe('Research question or keywords'),
+    maxPages: z.number().int().min(1).max(6).optional(),
   },
   async (args) => {
-    const envelope = await engine.handle('web_cache', args as Record<string, unknown>);
+    const envelope = await engine.handle('web_research', args as Record<string, unknown>);
     return textResult(envelope, envelope.status !== 'ok');
   },
 );

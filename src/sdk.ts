@@ -40,8 +40,13 @@ export class Lookout {
     return this.engine.handle('web_crawl', { ...input, url });
   }
 
-  /** Escape hatch for MCP-identical tool names. */
-  call(tool: (typeof CORE_TOOLS)[number], input: Record<string, unknown> = {}) {
+  /** Advanced: search then extract top pages with cite spans */
+  research(query: string, input: Record<string, unknown> = {}) {
+    return this.engine.handle('web_research', { ...input, query });
+  }
+
+  /** Escape hatch for MCP-identical tool names (core + advanced). */
+  call(tool: string, input: Record<string, unknown> = {}) {
     return this.engine.handle(tool, input);
   }
 }

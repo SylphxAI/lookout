@@ -13,5 +13,6 @@ describe('MCP tool contract', () => {
     expect(CORE_TOOLS).toEqual(['web_search', 'web_fetch', 'web_extract', 'web_cache']);
     // advanced tools stay separate (not folded into core)
     expect(src).toContain("'web_crawl'");
+    expect(src).toContain("'web_research'");
   });
 });
