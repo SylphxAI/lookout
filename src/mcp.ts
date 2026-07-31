@@ -89,6 +89,7 @@ server.tool(
     url: z.string().url(),
     maxDepth: z.number().int().min(0).max(3).optional(),
     maxPages: z.number().int().min(1).max(25).optional(),
+    respectRobots: z.boolean().optional().describe('Honor robots.txt User-agent: * Disallow (default true)'),
   },
   async (args) => {
     const envelope = await engine.handle('web_crawl', args as Record<string, unknown>);

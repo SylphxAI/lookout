@@ -4,6 +4,7 @@
 import { webFetch } from './fetch.ts';
 import { assertSafeUrl } from './ssrf.ts';
 import { decodeEntities } from './search.ts';
+import { checkRobotsAllowed } from './robots.ts';
 
 export type CrawlPage = {
   url: string;
@@ -70,7 +71,7 @@ function extractLinks(html: string, base: string): string[] {
 
 export async function webCrawl(
   seed: string,
-  options: { maxDepth?: number; maxPages?: number } = {},
+  options: { maxDepth?: number; maxPages?: number; respectRobots?: boolean } = {},
 ): Promise<CrawlResult> {
   const maxDepth = Math.min(options.maxDepth ?? 1, 3);
   const maxPages = Math.min(options.maxPages ?? 10, 25);
@@ -88,6 +89,24 @@ export async function webCrawl(
     };
   }
   const origin = seedCheck.url.origin;
+  const respectRobots = options.respectRobots !== false;
+  if (respectRobots) {
+    const robots = await checkRobotsAllowed(seedCheck.url.toString(), { respectRobots: true });
+    if (!robots.allowed) {
+      return {
+        ok: false,
+        seed,
+        maxDepth: Math.min(options.maxDepth ?? 1, 3),
+        maxPages: Math.min(options.maxPages ?? 10, 25),
+        pages: [],
+        warnings: [robots.warning ?? 'robots.txt disallows seed'],
+        route: 'crawl_light',
+      };
+    }
+    if (robots.warning) {
+      // missing robots.txt is fail-open with warning recorded later if we had a warnings push before loop
+    }
+  }
   const queue: { url: string; depth: number }[] = [{ url: seedCheck.url.toString(), depth: 0 }];
   const seen = new Set<string>();
   const pages: CrawlPage[] = [];
@@ -104,6 +123,19 @@ export async function webCrawl(
     if (safety.url.origin !== origin) {
       warnings.push(`skipped off-origin ${url}`);
       continue;
+    }
+    if (respectRobots) {
+      const robots = await checkRobotsAllowed(url, { respectRobots: true });
+      if (!robots.allowed) {
+        pages.push({
+          url,
+          ok: false,
+          links: [],
+          error: robots.warning ?? 'robots.txt disallow',
+        });
+        warnings.push(robots.warning ?? `robots disallow ${url}`);
+        continue;
+      }
     }
     const fetched = await webFetch(url, { timeoutMs: 12_000, maxBytes: 800_000 });
     const links = fetched.body ? extractLinks(fetched.body, fetched.finalUrl) : [];
