@@ -1,6 +1,6 @@
-# Sylphx Instruments
+# Sylphx Instruments (product family note)
 
-**Lookout** is the web instrument in the Sylphx Instruments family.
+**Lookout** is an independent product repository. Sylphx Instruments is company-level
+composable positioning — not a monorepo that owns this package.
 
-SSOT: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/sylphx-instruments-ssot.md  
-Product spec: https://github.com/SylphxAI/architecture-reader-mcp/blob/main/docs/portfolio/specs/lookout-product-spec-v0.md
+Sibling instruments each have their own GitHub repo for marketplace and stars.
