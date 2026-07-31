@@ -1,6 +1,10 @@
-# Sylphx Instruments (product family note)
+# Sylphx Instruments
 
-**Lookout** is an independent product repository. Sylphx Instruments is company-level
-composable positioning — not a monorepo that owns this package.
+This repository is **one independent product**. Marketplace listing, release,
+and stars for this product are owned **here only**.
 
-Sibling instruments each have their own GitHub repo for marketplace and stars.
+Company portfolio knowledge (composition principles, naming index):
+
+→ https://github.com/SylphxAI/instruments
+
+That repo is **docs-only** — not a monorepo of product code.
