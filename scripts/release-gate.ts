@@ -3,7 +3,7 @@
  * Lookout release gate — offline deterministic checks + doctor.
  * Live network is optional (LOOKOUT_LIVE=1) and never required for ship.
  */
-import { mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runDoctor } from '../src/doctor.ts';
 import { LookoutEngine, ADVANCED_TOOLS, CORE_TOOLS } from '../src/engine.ts';
@@ -44,6 +44,7 @@ add('research_requires_query', researchMissing.status === 'error', researchMissi
 
 const doctor = runDoctor();
 add('doctor_ok', doctor.ok, doctor.ok ? 'doctor ok' : 'doctor fail');
+add('agent_skill', existsSync(join(process.cwd(), 'skills/lookout/SKILL.md')), 'skills/lookout/SKILL.md');
 
 const report = {
   profile: 'lookout_release_gate',

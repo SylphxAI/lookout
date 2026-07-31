@@ -1,10 +1,10 @@
 {
   "profile": "lookout_release_gate",
-  "generated_at": "2026-07-31T17:12:03.956Z",
+  "generated_at": "2026-07-31T17:16:28.723Z",
   "status": "passed",
   "summary": {
-    "total": 8,
-    "passed": 8,
+    "total": 9,
+    "passed": 9,
     "failed": 0
   },
   "checks": [
@@ -47,6 +47,11 @@
       "id": "doctor_ok",
       "status": "passed",
       "message": "doctor ok"
+    },
+    {
+      "id": "agent_skill",
+      "status": "passed",
+      "message": "skills/lookout/SKILL.md"
     }
   ]
 }

@@ -7,6 +7,10 @@
 Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) (learn multi-surface + honesty; **do not** require multi-GB browser/model warmup).
 
 
+## Agent skill surface
+
+See [`skills/lookout/SKILL.md`](./skills/lookout/SKILL.md).
+
 ## Why Lookout (vs multi-GB “local web” stacks)
 
 | Typical agent web path | Lookout |
