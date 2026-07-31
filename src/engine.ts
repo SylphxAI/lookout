@@ -1,7 +1,7 @@
 import { LookoutCache, cacheKey, defaultCacheDir } from './cache.ts';
 import { extractFromHtml } from './extract.ts';
 import { webFetch } from './fetch.ts';
-import { webSearch } from './search.ts';
+import { webSearch, filterHitsByHosts } from './search.ts';
 import { webCrawl } from './crawl.ts';
 import { webResearch } from './research.ts';
 
@@ -104,14 +104,39 @@ export class LookoutEngine {
       warnings.push(...result.warnings);
       engines.push(...result.engines);
     }
+    const includeHosts = Array.isArray(input.hostsInclude)
+      ? input.hostsInclude.map(String)
+      : input.hostInclude
+        ? [String(input.hostInclude)]
+        : [];
+    const excludeHosts = Array.isArray(input.hostsExclude)
+      ? input.hostsExclude.map(String)
+      : input.hostExclude
+        ? [String(input.hostExclude)]
+        : [];
+    let hits = allHits;
+    const filterWarnings: string[] = [];
+    if (includeHosts.length || excludeHosts.length) {
+      const before = hits.length;
+      hits = filterHitsByHosts(hits, { include: includeHosts, exclude: excludeHosts });
+      filterWarnings.push(
+        `host_filter kept ${hits.length}/${before} (include=${includeHosts.join(',') || '*'}; exclude=${excludeHosts.join(',') || 'none'})`,
+      );
+    }
     return {
-      status: allHits.length ? 'ok' : 'error',
+      status: hits.length ? 'ok' : 'error',
       tool: 'web_search',
-      answer: { queries, hits: allHits, engines },
-      warnings,
+      answer: {
+        queries,
+        hits,
+        engines,
+        hostsInclude: includeHosts.length ? includeHosts : undefined,
+        hostsExclude: excludeHosts.length ? excludeHosts : undefined,
+      },
+      warnings: [...warnings, ...filterWarnings],
       route: 'local_adapters',
-      code: allHits.length ? undefined : 'NO_HITS',
-      message: allHits.length ? undefined : 'No search hits from local adapters',
+      code: hits.length ? undefined : 'NO_HITS',
+      message: hits.length ? undefined : 'No search hits from local adapters',
     };
   }
 

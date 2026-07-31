@@ -218,6 +218,23 @@ export function fuse(hitLists: SearchHit[][], query?: string): SearchHit[] {
   }));
 }
 
+/** Filter ranked hits by include/exclude host substrings (case-insensitive). */
+export function filterHitsByHosts(
+  hits: SearchHit[],
+  opts: { include?: string[]; exclude?: string[] } = {},
+): SearchHit[] {
+  const include = (opts.include ?? []).map((h) => h.toLowerCase()).filter(Boolean);
+  const exclude = (opts.exclude ?? []).map((h) => h.toLowerCase()).filter(Boolean);
+  return hits.filter((hit) => {
+    const host = (hit.host ?? hostnameOf(hit.url)).toLowerCase();
+    if (exclude.some((e) => host === e || host.endsWith(`.${e}`) || host.includes(e))) {
+      return false;
+    }
+    if (!include.length) return true;
+    return include.some((e) => host === e || host.endsWith(`.${e}`) || host.includes(e));
+  });
+}
+
 export async function webSearch(query: string): Promise<SearchResult> {
   const warnings: string[] = [];
   const engines: SearchResult['engines'] = [];

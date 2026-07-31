@@ -2,6 +2,7 @@ import { describe, expect, test } from 'bun:test';
 import { readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import {
+  filterHitsByHosts,
   fuse,
   normalizeResultUrl,
   parseDuckDuckGoHtml,
@@ -98,5 +99,20 @@ describe('fuse query terms', () => {
     const top = fused[0];
     expect(top?.url).toContain('b.com');
     expect(top?.scoreExplain.some((s) => s.startsWith('query_term_boost'))).toBe(true);
+  });
+});
+
+
+describe('filterHitsByHosts', () => {
+  test('includes and excludes by host', () => {
+    const hits = [
+      { title: 'a', url: 'https://docs.example.com/a', snippet: '', engine: 't', score: 1, scoreExplain: [], host: 'docs.example.com' },
+      { title: 'b', url: 'https://spam.bad/x', snippet: '', engine: 't', score: 1, scoreExplain: [], host: 'spam.bad' },
+      { title: 'c', url: 'https://github.com/x', snippet: '', engine: 't', score: 1, scoreExplain: [], host: 'github.com' },
+    ];
+    const onlyDocs = filterHitsByHosts(hits, { include: ['example.com'] });
+    expect(onlyDocs.map((h) => h.host)).toEqual(['docs.example.com']);
+    const noSpam = filterHitsByHosts(hits, { exclude: ['spam.bad'] });
+    expect(noSpam.every((h) => h.host !== 'spam.bad')).toBe(true);
   });
 });

@@ -28,6 +28,8 @@ server.tool(
   {
     query: z.union([z.string(), z.array(z.string())]).describe('Search query or queries'),
     useCache: z.boolean().optional(),
+    hostsInclude: z.array(z.string()).optional().describe('Keep only hits whose host matches any entry'),
+    hostsExclude: z.array(z.string()).optional().describe('Drop hits whose host matches any entry'),
   },
   async (args) => {
     const envelope = await engine.handle('web_search', args as Record<string, unknown>);
