@@ -1,19 +1,26 @@
-# Tool surface — this product
+# Tool surface — Lookout
 
-Policy: **few, powerful, obvious** tools. Prefer the primary read tool first.
+Policy: **few, powerful, obvious** tools.
+
+## Primary
 
 | Tool | Role |
 | --- | --- |
-| `web_search` | Local-first public search adapters |
+| `web_search` | Local-first public search adapters (no paid key required) |
 | `web_fetch` | SSRF-aware fetch |
 | `web_extract` | Main-content extract with citeable spans |
+
+## Advanced
+
+| Tool | Role |
+| --- | --- |
 | `web_cache` | Cache stats/control |
-| `web_crawl` | Advanced crawl |
-| `web_research` | Advanced multi-step research |
+| `web_crawl` | Multi-page crawl |
+| `web_research` | Multi-step research orchestration |
 
 ## Rules
 
-1. Do not add near-duplicate tools that only differ by vanity naming.
+1. Default agent path: **search → fetch → extract**.
 2. Advanced tools must be labeled advanced in README/skill.
-3. Schema fields should be agent-obvious; fail closed on unsafe input.
-4. Composition with sibling products is via public contracts, not monorepo imports.
+3. No paid API key required for primary path.
+4. Local-first means process runs locally; network is inherent to web.
