@@ -48,7 +48,7 @@ jobs:
             echo already "$NAME@$VER"; npm view "$NAME" version dist-tags; exit 0
           fi
           # First-time packages under a scope sometimes need --access public
-          npm publish --access public 2>&1 | tee /tmp/npm-publish.log
+          npm publish --access public --workspaces=false 2>&1 | tee /tmp/npm-publish.log
           # Retry view with backoff (registry propagation)
           for i in 1 2 3 4 5 6; do
             if npm view "$NAME@$VER" version; then
