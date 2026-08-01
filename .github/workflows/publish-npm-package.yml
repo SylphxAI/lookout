@@ -34,33 +34,28 @@ jobs:
           set -euo pipefail
           TOKEN="${NODE_AUTH_TOKEN:-$NPM_TOKEN}"
           test -n "$TOKEN"
-          # Isolate from any parent workspace package.json
-          export npm_config_workspaces=false
-          export npm_config_workspace=false
           printf '//registry.npmjs.org/:_authToken=%s\nalways-auth=true\n' "$TOKEN" > "$HOME/.npmrc"
           export NPM_CONFIG_USERCONFIG="$HOME/.npmrc"
+          # clear conflicting workspace env from setup-node
+          unset npm_config_workspace || true
+          unset npm_config_workspaces || true
           npm whoami
           NAME=$(node -p "require('./package.json').name")
           VER=$(node -p "require('./package.json').version")
           echo "cwd=$(pwd) publishing $NAME@$VER"
-          # If version exists, succeed.
           if npm view "$NAME@$VER" version >/dev/null 2>&1; then
             echo already "$NAME@$VER"; npm view "$NAME" version dist-tags; exit 0
           fi
-          # First-time packages under a scope sometimes need --access public
-          npm publish --access public --workspaces=false 2>&1 | tee /tmp/npm-publish.log
-          # Retry view with backoff (registry propagation)
-          for i in 1 2 3 4 5 6; do
+          npm publish --access public 2>&1 | tee /tmp/npm-publish.log
+          for i in 1 2 3 4 5 6 7 8 9 10 11 12; do
             if npm view "$NAME@$VER" version; then
               npm view "$NAME" version dist-tags
               exit 0
             fi
             sleep 5
           done
-          # If publish log shows success but view still 404, still fail for honesty
-          if grep -q "+ $NAME@$VER" /tmp/npm-publish.log || grep -q "$NAME@$VER" /tmp/npm-publish.log; then
-            echo "Publish reported success; registry readback delayed. Treating as success after log proof."
-            cat /tmp/npm-publish.log | tail -20
+          if grep -q "+ $NAME@$VER" /tmp/npm-publish.log; then
+            echo "Publish log success; delayed readback ok"
             exit 0
           fi
           exit 1
