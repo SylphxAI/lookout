@@ -3,7 +3,8 @@
 pub const ENGINE_NAME: &str = "lookout-core";
 pub const ENGINE_VERSION: &str = "0.1.0";
 
-pub const CORE_TOOLS: &[&str] = &["web_search", "web_fetch", "web_extract", "web_cache"];
+pub const CORE_TOOLS: &[&str] = &["web_search", "web_fetch", "web_extract"];
+pub const ADVANCED_TOOLS: &[&str] = &["web_cache", "web_crawl", "web_research"];
 
 pub fn is_blocked_hostname(host: &str) -> bool {
     let h = host.trim_matches(|c| c == '[' || c == ']').to_ascii_lowercase();
@@ -39,7 +40,8 @@ mod tests {
 
     #[test]
     fn core_tools_are_clear_and_separate() {
-        assert_eq!(CORE_TOOLS.len(), 4);
+        assert_eq!(CORE_TOOLS.len(), 3);
+        assert_eq!(ADVANCED_TOOLS.len(), 3);
     }
 
     #[test]
