@@ -21,7 +21,7 @@ Tiny default: public search adapters + fetch/extract/cache with citeable excerpt
 - `web_search`
 - `web_fetch`
 - `web_extract`
-- `web_cache`
+- ~~core~~ `web_cache` (advanced)
 - `web_crawl (advanced)`
 - `web_research (advanced)`
 

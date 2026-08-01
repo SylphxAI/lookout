@@ -423,5 +423,5 @@ export class LookoutEngine {
   }
 }
 
-export const CORE_TOOLS = ['web_search', 'web_fetch', 'web_extract', 'web_cache'] as const;
-export const ADVANCED_TOOLS = ['web_crawl', 'web_research'] as const;
+export const CORE_TOOLS = ['web_search', 'web_fetch', 'web_extract'] as const;
+export const ADVANCED_TOOLS = ['web_cache', 'web_crawl', 'web_research'] as const;

@@ -10,7 +10,7 @@ describe('MCP tool contract', () => {
       expect(src).toContain(`'${tool}'`);
     }
     // clear tools not merged into one god tool
-    expect(CORE_TOOLS).toEqual(['web_search', 'web_fetch', 'web_extract', 'web_cache']);
+    expect(CORE_TOOLS).toEqual(['web_search', 'web_fetch', 'web_extract']);
     // advanced tools stay separate (not folded into core)
     expect(src).toContain("'web_crawl'");
     expect(src).toContain("'web_research'");

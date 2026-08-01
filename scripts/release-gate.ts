@@ -18,7 +18,7 @@ function add(id: string, ok: boolean, message: string) {
   checks.push({ id, status: ok ? 'passed' : 'failed', message });
 }
 
-add('core_tools_count', CORE_TOOLS.length === 4, `core=${CORE_TOOLS.join(',')}`);
+add('core_tools_count', CORE_TOOLS.length === 3, `core=${CORE_TOOLS.join(',')}`);
 add(
   'advanced_tools',
   ADVANCED_TOOLS.includes('web_crawl') && ADVANCED_TOOLS.includes('web_research'),

@@ -14,7 +14,7 @@ export function runDoctor(version = '0.1.0'): DoctorReport {
   const checks: DoctorReport['checks'] = [];
   checks.push({
     name: 'core_tools',
-    status: CORE_TOOLS.length === 4 ? 'ok' : 'fail',
+    status: CORE_TOOLS.length === 3 ? 'ok' : 'fail',
     message: `core: ${CORE_TOOLS.join(', ')}; advanced: ${ADVANCED_TOOLS.join(', ')}`,
   });
   const cacheDir = defaultCacheDir();

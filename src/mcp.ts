@@ -1,6 +1,6 @@
 /**
  * Lookout MCP server — stdio tools:
- * core: web_search, web_fetch, web_extract, web_cache
+ * core: web_search, web_fetch, web_extract; advanced: web_cache, web_crawl, web_research
  * advanced: web_crawl, web_research
  */
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';

@@ -3,7 +3,7 @@ import { CORE_TOOLS, Lookout } from '../src/sdk.ts';
 
 describe('Lookout SDK surface', () => {
   test('core tools are clear and separate', () => {
-    expect([...CORE_TOOLS]).toEqual(['web_search', 'web_fetch', 'web_extract', 'web_cache']);
+    expect([...CORE_TOOLS]).toEqual(['web_search', 'web_fetch', 'web_extract']);
   });
 
   test('constructs', () => {

@@ -95,7 +95,7 @@ const extracted = await lookout.extract({ url: 'https://example.com' })
 | `web_search` | Public adapters (DuckDuckGo HTML + Wikipedia + npm registry + HN Algolia), rank fusion, query-term boost, host filters |
 | `web_fetch` | SSRF-safe HTTP(S) fetch, redirects, size limits, cite spans |
 | `web_extract` | Title, description, JSON-LD, tables, spans from HTML/URL |
-| `web_cache` | Local disk cache query/stats/clear/prune (`LOOKOUT_CACHE_DIR`, optional max age) |
+| `web_cache` (advanced) | Local disk cache query/stats/clear/prune (`LOOKOUT_CACHE_DIR`, optional max age) |
 | `web_crawl` *(advanced)* | Same-origin, depth-limited crawl (not a full-site crawler) |
 | `web_research` *(advanced)* | Search then fetch/extract top pages with citeable excerpts |
 

@@ -1,8 +1,8 @@
 {
   "name": "@sylphx/lookout",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "private": false,
-  "description": "Lookout \u2014 local-first web instrument for agents. Search, fetch, extract, cache with citeable excerpts. No required API key. SDK \u00b7 CLI \u00b7 MCP.",
+  "description": "Lookout — local-first web instrument for agents. Search, fetch, extract, cache with citeable excerpts. No required API key. SDK · CLI · MCP.",
   "type": "module",
   "license": "MIT",
   "bin": {
