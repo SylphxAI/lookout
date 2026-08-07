@@ -6,13 +6,53 @@ import { webSearch, filterHitsByHosts } from './search.ts';
 import { webCrawl } from './crawl.ts';
 import { webResearch } from './research.ts';
 
+
+/** Family evidence envelope v1 fields required on every Lookout tool result. */
+export const ENVELOPE_VERSION = '1' as const;
+export const LOOKOUT_PRODUCT = 'lookout' as const;
+export const LOOKOUT_PRODUCT_VERSION = '0.2.0';
+export const LOOKOUT_ROUTE = { engine: 'lookout-ts', path: 'default' } as const;
+
+export function withFamilyEnvelope<T extends Record<string, unknown>>(tool: string, body: T): T & {
+  envelope_version: typeof ENVELOPE_VERSION;
+  product: typeof LOOKOUT_PRODUCT;
+  product_version: string;
+  tool: string;
+  route: typeof LOOKOUT_ROUTE;
+} {
+  const warnings = Array.isArray((body as { warnings?: unknown }).warnings)
+    ? ((body as { warnings: string[] }).warnings)
+    : [];
+  const gaps = Array.isArray((body as { gaps?: unknown }).gaps)
+    ? ((body as { gaps: string[] }).gaps)
+    : [];
+  return {
+    envelope_version: ENVELOPE_VERSION,
+    product: LOOKOUT_PRODUCT,
+    product_version: LOOKOUT_PRODUCT_VERSION,
+    tool,
+    route: LOOKOUT_ROUTE,
+    gaps,
+    ...body,
+    warnings: Array.isArray((body as { warnings?: unknown }).warnings)
+      ? (body as { warnings: string[] }).warnings
+      : warnings,
+  };
+}
+
+
 export type ToolEnvelope = {
-  status: 'ok' | 'error';
+  envelope_version?: '1';
+  product?: 'lookout';
+  product_version?: string;
+  status: 'ok' | 'error' | 'partial';
   tool: string;
   answer?: unknown;
   evidence?: unknown;
+  payload?: unknown;
   warnings: string[];
-  route?: string;
+  gaps?: string[];
+  route?: string | { engine: string; path?: string; adapter?: string };
   code?: string;
   message?: string;
 };
@@ -51,13 +91,13 @@ export class LookoutEngine {
       case 'web_crawl':
         return this.crawl(input);
       default:
-        return {
+        return withFamilyEnvelope(tool, {
           status: 'error',
           tool,
           warnings: [],
           code: 'UNKNOWN_TOOL',
           message: `Unknown tool: ${tool}`,
-        };
+        });
     }
   }
 
@@ -69,13 +109,13 @@ export class LookoutEngine {
         ? [String(queryRaw)]
         : [];
     if (!queries.length) {
-      return {
+      return withFamilyEnvelope('web_search', {
         status: 'error',
         tool: 'web_search',
         warnings: [],
         code: 'INVALID_INPUT',
         message: 'web_search requires query (string or string[])',
-      };
+      });
     }
     const useCache = input.useCache !== false;
     const allHits = [];
@@ -124,7 +164,7 @@ export class LookoutEngine {
         `host_filter kept ${hits.length}/${before} (include=${includeHosts.join(',') || '*'}; exclude=${excludeHosts.join(',') || 'none'})`,
       );
     }
-    return {
+    return withFamilyEnvelope('web_search', {
       status: hits.length ? 'ok' : 'error',
       tool: 'web_search',
       answer: {
@@ -138,19 +178,19 @@ export class LookoutEngine {
       route: 'local_adapters',
       code: hits.length ? undefined : 'NO_HITS',
       message: hits.length ? undefined : 'No search hits from local adapters',
-    };
+    });
   }
 
   private async fetch(input: Record<string, unknown>): Promise<ToolEnvelope> {
     const url = String(input.url ?? '');
     if (!url) {
-      return {
+      return withFamilyEnvelope('web_fetch', {
         status: 'error',
         tool: 'web_fetch',
         warnings: [],
         code: 'INVALID_INPUT',
         message: 'web_fetch requires url',
-      };
+      });
     }
     const useCache = input.useCache !== false;
     const respectRobots = input.respectRobots === true; // default off for fetch (crawl defaults on)
@@ -158,26 +198,26 @@ export class LookoutEngine {
     if (useCache) {
       const cached = this.cache.get(key, { maxAgeMs: this.cacheMaxAgeMs() });
       if (cached) {
-        return {
+        return withFamilyEnvelope('web_fetch', {
           status: 'ok',
           tool: 'web_fetch',
           answer: { ...JSON.parse(cached.body), fromCache: true },
           warnings: ['served_from_cache'],
           route: 'cache',
-        };
+        });
       }
     }
     if (respectRobots) {
       const robots = await checkRobotsAllowed(url, { respectRobots: true });
       if (!robots.allowed) {
-        return {
+        return withFamilyEnvelope('web_fetch', {
           status: 'error',
           tool: 'web_fetch',
           warnings: [robots.warning ?? 'robots.txt disallow'],
           code: 'ROBOTS_DISALLOW',
           message: robots.warning ?? 'Blocked by robots.txt',
           route: 'robots.txt',
-        };
+        });
       }
     }
     const result = await webFetch(url, {
@@ -198,7 +238,7 @@ export class LookoutEngine {
     const spans = excerpt
       ? [{ text: excerpt, start: 0, end: excerpt.length, kind: 'body_prefix' }]
       : [];
-    return {
+    return withFamilyEnvelope('web_fetch', {
       status: result.ok ? 'ok' : 'error',
       tool: 'web_fetch',
       answer: { ...result, spans },
@@ -206,7 +246,7 @@ export class LookoutEngine {
       route: result.route,
       code: result.code,
       message: result.message,
-    };
+    });
   }
 
   private async extract(input: Record<string, unknown>): Promise<ToolEnvelope> {
@@ -224,13 +264,13 @@ export class LookoutEngine {
       }
     }
     if (!html) {
-      return {
+      return withFamilyEnvelope('web_extract', {
         status: 'error',
         tool: 'web_extract',
         warnings: [],
         code: 'INVALID_INPUT',
         message: 'web_extract requires html or url',
-      };
+      });
     }
     // JSON bodies: light local extract without HTML DOM
     const looksJson =
@@ -244,7 +284,7 @@ export class LookoutEngine {
         // keep as text
       }
       const text = typeof parsed === 'string' ? parsed : JSON.stringify(parsed ?? html).slice(0, 4000);
-      return {
+      return withFamilyEnvelope('web_extract', {
         status: 'ok',
         tool: 'web_extract',
         answer: {
@@ -263,12 +303,12 @@ export class LookoutEngine {
         },
         warnings: parsed ? [] : ['json_parse_failed_used_raw_text'],
         route: 'json_body',
-      };
+      });
     }
     const ct = typeof input.contentType === 'string' ? input.contentType : '';
     if ((ct.includes('text/plain') || ct.includes('text/markdown')) && !/<html[\s>]/i.test(html) && !/<body[\s>]/i.test(html)) {
       const text = html.slice(0, 4000);
-      return {
+      return withFamilyEnvelope('web_extract', {
         status: 'ok',
         tool: 'web_extract',
         answer: {
@@ -287,16 +327,16 @@ export class LookoutEngine {
         },
         warnings: [],
         route: ct.includes('markdown') ? 'text_markdown' : 'text_plain',
-      };
+      });
     }
     const extracted = extractFromHtml(html, url);
-    return {
+    return withFamilyEnvelope('web_extract', {
       status: 'ok',
       tool: 'web_extract',
       answer: extracted,
       warnings: extracted.warnings,
       route: extracted.route,
-    };
+    });
   }
 
 
@@ -304,13 +344,13 @@ export class LookoutEngine {
   private async research(input: Record<string, unknown>): Promise<ToolEnvelope> {
     const query = typeof input.query === 'string' ? input.query : Array.isArray(input.query) ? input.query.join(' ') : '';
     if (!query.trim()) {
-      return {
+      return withFamilyEnvelope('web_research', {
         status: 'error',
         tool: 'web_research',
         code: 'INVALID_INPUT',
         message: 'web_research requires query',
         warnings: [],
-      };
+      });
     }
     const maxPages = typeof input.maxPages === 'number' ? input.maxPages : undefined;
     const hostsInclude = Array.isArray(input.hostsInclude)
@@ -328,7 +368,7 @@ export class LookoutEngine {
       hostsInclude: hostsInclude.length ? hostsInclude : undefined,
       hostsExclude: hostsExclude.length ? hostsExclude : undefined,
     });
-    return {
+    return withFamilyEnvelope('web_research', {
       status: 'ok',
       tool: 'web_research',
       answer: {
@@ -341,66 +381,66 @@ export class LookoutEngine {
       ),
       warnings: result.warnings,
       route: result.route,
-    };
+    });
   }
 
   private async crawl(input: Record<string, unknown>): Promise<ToolEnvelope> {
     const url = String(input.url ?? input.seed ?? '');
     if (!url) {
-      return {
+      return withFamilyEnvelope('web_crawl', {
         status: 'error',
         tool: 'web_crawl',
         warnings: [],
         code: 'INVALID_INPUT',
         message: 'web_crawl requires url',
-      };
+      });
     }
     const result = await webCrawl(url, {
       maxDepth: typeof input.maxDepth === 'number' ? input.maxDepth : undefined,
       maxPages: typeof input.maxPages === 'number' ? input.maxPages : undefined,
     });
-    return {
+    return withFamilyEnvelope('web_crawl', {
       status: result.ok ? 'ok' : 'error',
       tool: 'web_crawl',
       answer: result,
       warnings: result.warnings,
       route: result.route,
       code: result.ok ? undefined : 'CRAWL_FAILED',
-    };
+    });
   }
 
   private cacheTool(input: Record<string, unknown>): ToolEnvelope {
     const op = String(input.op ?? input.operation ?? 'query');
     if (op === 'stats') {
-      return {
+      return withFamilyEnvelope('web_cache', {
         status: 'ok',
         tool: 'web_cache',
         answer: this.cache.stats(),
         warnings: [],
         route: 'cache',
-      };
+      });
     }
     if (op === 'clear') {
-      return {
+      return withFamilyEnvelope('web_cache', {
         status: 'ok',
         tool: 'web_cache',
         answer: this.cache.clear(),
         warnings: [],
         route: 'cache',
-      };
+      });
     }
     if (op === 'prune') {
       const maxAgeMs =
         typeof input.maxAgeMs === 'number'
           ? input.maxAgeMs
           : this.cacheMaxAgeMs() ?? 86_400_000;
-      return {
+      return withFamilyEnvelope('web_cache', {
         status: 'ok',
         tool: 'web_cache',
         answer: { ...this.cache.pruneExpired(maxAgeMs), maxAgeMs },
         warnings: [],
         route: 'cache',
-      };
+      });
     }
     const q = String(input.query ?? '');
     const limit = typeof input.limit === 'number' ? input.limit : 20;
@@ -413,13 +453,13 @@ export class LookoutEngine {
       contentType: r.contentType,
       preview: r.body.slice(0, 200),
     }));
-    return {
+    return withFamilyEnvelope('web_cache', {
       status: 'ok',
       tool: 'web_cache',
       answer: { results, dir: this.cache.dir },
       warnings: [],
       route: 'cache',
-    };
+    });
   }
 }
 

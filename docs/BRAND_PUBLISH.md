@@ -1,11 +1,3 @@
-# Lookout — brand npm publish
+# Lookout — brand-sole
 
-**Publish authority:** this repository only.
-
-| Field | Value |
-| --- | --- |
-| Brand | **Lookout** |
-| Canonical npm id | `@sylphx/lookout` |
-| Transitional id | _(none — shipped as brand from day one)_ |
-
-No dual-name expand required.
+Canonical: `@sylphx/lookout` · bin `lookout` · already brand-native.
