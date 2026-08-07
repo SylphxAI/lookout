@@ -18,7 +18,7 @@ export function withFamilyEnvelope<T extends Record<string, unknown>>(tool: stri
   product: typeof LOOKOUT_PRODUCT;
   product_version: string;
   tool: string;
-  route: typeof LOOKOUT_ROUTE;
+  route: { engine: string; path: string };
 } {
   const warnings = Array.isArray((body as { warnings?: unknown }).warnings)
     ? ((body as { warnings: string[] }).warnings)
@@ -26,20 +26,24 @@ export function withFamilyEnvelope<T extends Record<string, unknown>>(tool: stri
   const gaps = Array.isArray((body as { gaps?: unknown }).gaps)
     ? ((body as { gaps: string[] }).gaps)
     : [];
+  const legacyRoute = (body as { route?: unknown }).route;
   return {
+    ...body,
     envelope_version: ENVELOPE_VERSION,
     product: LOOKOUT_PRODUCT,
     product_version: LOOKOUT_PRODUCT_VERSION,
     tool,
-    route: LOOKOUT_ROUTE,
+    route: {
+      engine: LOOKOUT_ROUTE.engine,
+      path:
+        typeof legacyRoute === 'string' && legacyRoute.length > 0
+          ? legacyRoute
+          : LOOKOUT_ROUTE.path,
+    },
+    warnings,
     gaps,
-    ...body,
-    warnings: Array.isArray((body as { warnings?: unknown }).warnings)
-      ? (body as { warnings: string[] }).warnings
-      : warnings,
   };
 }
-
 
 export type ToolEnvelope = {
   envelope_version?: '1';
@@ -254,7 +258,7 @@ export class LookoutEngine {
     let url = typeof input.url === 'string' ? input.url : undefined;
     if (!html && url) {
       const fetched = await this.fetch({ url, useCache: input.useCache });
-      if (fetched.status !== 'ok') return { ...fetched, tool: 'web_extract' };
+      if (fetched.status !== 'ok') return withFamilyEnvelope('web_extract', { ...fetched, tool: 'web_extract' });
       const body = (fetched.answer as { body?: string })?.body;
       html = body;
       url = (fetched.answer as { finalUrl?: string })?.finalUrl ?? url;
