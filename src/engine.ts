@@ -10,7 +10,7 @@ import { webResearch } from './research.ts';
 /** Family evidence envelope v1 fields required on every Lookout tool result. */
 export const ENVELOPE_VERSION = '1' as const;
 export const LOOKOUT_PRODUCT = 'lookout' as const;
-export const LOOKOUT_PRODUCT_VERSION = '0.2.0';
+export const LOOKOUT_PRODUCT_VERSION = '0.2.1';
 export const LOOKOUT_ROUTE = { engine: 'lookout-ts', path: 'default' } as const;
 
 export function withFamilyEnvelope<T extends Record<string, unknown>>(tool: string, body: T): T & {

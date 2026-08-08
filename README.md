@@ -1,5 +1,19 @@
 # Lookout
 
+## Zero-config (no install)
+
+```bash
+npx -y @sylphx/lookout
+```
+
+Starts the MCP server on stdio. CLI:
+
+```bash
+npx -y @sylphx/lookout doctor
+npx -y @sylphx/lookout search "local first agents"
+```
+
+
 ### The web from your machine. 
 
 **Lookout** is a local-first **web instrument** for agents and apps: **search, fetch, extract, cache** with citeable excerpts — **no required API key**, **tiny default install**, same API on **SDK · CLI · MCP**.
