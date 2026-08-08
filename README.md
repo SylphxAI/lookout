@@ -22,6 +22,25 @@ Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) (lear
 
 
 
+
+## Why Lookout wins for agents
+
+1. **Zero-config web instrument** — `npx -y @sylphx/lookout` (MCP on stdio by default).
+2. **No API key required** for core search/fetch/extract paths.
+3. **Citeable excerpts** — agents get evidence-shaped results, not anonymous blurbs.
+4. **Local-first cache** — faster repeat research, fewer surprise network calls.
+5. **CLI + MCP** — `npx -y @sylphx/lookout doctor|search|fetch|extract`.
+
+| | Generic web scraper | Paid search API | **Lookout** |
+| --- | --- | --- | --- |
+| Agent-ready MCP | ❌ | sometimes | ✅ stdio MCP |
+| Zero-config | rare | account setup | **`npx -y`** |
+| API key | optional | required | **not required for core** |
+| Evidence shape | DIY | vendor JSON | family envelope |
+
+**Live:** `@sylphx/lookout@0.2.1` · bin `lookout`.
+
+
 ## Product docs
 
 | Doc | Purpose |

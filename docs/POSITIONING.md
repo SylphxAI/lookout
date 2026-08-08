@@ -40,3 +40,11 @@ See [COMPETITIVE.md](./COMPETITIVE.md).
 ## Completion bar
 
 See [IPPB.md](./IPPB.md).
+
+## Zero-config CTA
+
+```bash
+npx -y @sylphx/lookout
+```
+
+Bare invoke starts MCP stdio; CLI subcommands work the same way.

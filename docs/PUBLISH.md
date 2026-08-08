@@ -18,3 +18,8 @@ npm i -g @sylphx/lookout
 ```
 
 Workflows: `publish-npm-package.yml`, `publish-brand-alias.yml`.
+
+## Live
+
+`@sylphx/lookout@0.2.1` — `npx -y @sylphx/lookout`
+
