@@ -25,3 +25,11 @@ Default public adapters; no required API key; SSRF-safe fetch.
 - Becoming a cloud SaaS wrapper as the default path
 - Multi-product monorepo for star aggregation
 - Generative summaries as the sole evidence authority
+
+## Zero-config CTA
+
+```bash
+npx -y @sylphx/lookout
+```
+
+Bare invoke starts MCP stdio; CLI subcommands work the same way.
