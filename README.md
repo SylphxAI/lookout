@@ -82,7 +82,7 @@ lookout search "model context protocol"
 Claude Code:
 
 ```bash
-claude mcp add lookout -- npx @sylphx/lookout
+claude mcp add lookout -- npx -y @sylphx/lookout
 ```
 
 ## Install (dev)
