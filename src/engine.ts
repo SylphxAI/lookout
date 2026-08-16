@@ -402,6 +402,8 @@ export class LookoutEngine {
     const result = await webCrawl(url, {
       maxDepth: typeof input.maxDepth === 'number' ? input.maxDepth : undefined,
       maxPages: typeof input.maxPages === 'number' ? input.maxPages : undefined,
+      respectRobots: typeof input.respectRobots === 'boolean' ? input.respectRobots : undefined,
+      useSitemap: typeof input.useSitemap === 'boolean' ? input.useSitemap : undefined,
     });
     return withFamilyEnvelope('web_crawl', {
       status: result.ok ? 'ok' : 'error',
