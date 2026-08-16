@@ -19,6 +19,71 @@ const DEFAULT_MAX_BYTES = 1_500_000;
 const DEFAULT_TIMEOUT_MS = 20_000;
 const MAX_REDIRECTS = 5;
 
+function normalizeMaxBytes(value: number): number {
+  return Number.isFinite(value) && value >= 0 ? Math.floor(value) : DEFAULT_MAX_BYTES;
+}
+
+type ReadBodyResult = { bytes: Uint8Array; truncated: boolean };
+
+async function cancelQuietly(reader: ReadableStreamDefaultReader<Uint8Array>): Promise<void> {
+  try {
+    await reader.cancel('Lookout response byte limit reached');
+  } catch {
+    // The response is already being discarded; cancellation failure must not
+    // turn a bounded fetch into an unbounded or otherwise misleading result.
+  }
+}
+
+/** Read at most maxBytes from a response body and cancel the source at the cap. */
+async function readBodyCapped(res: Response, maxBytes: number): Promise<ReadBodyResult> {
+  const limit = normalizeMaxBytes(maxBytes);
+  const body = res.body;
+  if (!body) {
+    const bytes = new Uint8Array(await res.arrayBuffer());
+    if (bytes.byteLength <= limit) return { bytes, truncated: false };
+    return { bytes: bytes.slice(0, limit), truncated: true };
+  }
+
+  const reader = body.getReader();
+  const output = new Uint8Array(limit);
+  let offset = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) return { bytes: output.slice(0, offset), truncated: false };
+      const chunk = value ?? new Uint8Array();
+      const remaining = limit - offset;
+      if (chunk.byteLength > remaining) {
+        if (remaining > 0) output.set(chunk.subarray(0, remaining), offset);
+        await cancelQuietly(reader);
+        return { bytes: output, truncated: true };
+      }
+      if (chunk.byteLength > 0) {
+        output.set(chunk, offset);
+        offset += chunk.byteLength;
+      }
+      if (offset !== limit) continue;
+
+      const declaredLength = Number(res.headers.get('content-length'));
+      if (Number.isFinite(declaredLength) && declaredLength === limit) {
+        return { bytes: output, truncated: false };
+      }
+      if (Number.isFinite(declaredLength) && declaredLength > limit) {
+        await cancelQuietly(reader);
+        return { bytes: output, truncated: true };
+      }
+
+      // Without a trustworthy Content-Length, stop at the cap rather than
+      // waiting for a slow or infinite stream to reveal whether more bytes
+      // exist. The conservative truncated status preserves the safety floor.
+      await cancelQuietly(reader);
+      return { bytes: output, truncated: true };
+    }
+  } finally {
+    reader.releaseLock();
+  }
+}
+
 export async function webFetch(
   rawUrl: string,
   options: { maxBytes?: number; timeoutMs?: number; userAgent?: string } = {},
@@ -28,9 +93,10 @@ export async function webFetch(
   let current = rawUrl;
   const envMax = process.env.LOOKOUT_FETCH_MAX_BYTES?.trim();
   const envTimeout = process.env.LOOKOUT_FETCH_TIMEOUT_MS?.trim();
-  const maxBytes =
+  const maxBytesCandidate =
     options.maxBytes ??
     (envMax && Number.isFinite(Number(envMax)) ? Number(envMax) : DEFAULT_MAX_BYTES);
+  const maxBytes = normalizeMaxBytes(maxBytesCandidate);
   const timeoutMs =
     options.timeoutMs ??
     (envTimeout && Number.isFinite(Number(envTimeout)) ? Number(envTimeout) : DEFAULT_TIMEOUT_MS);
@@ -89,15 +155,9 @@ export async function webFetch(
       }
 
       const contentType = res.headers.get('content-type') ?? undefined;
-      const buf = new Uint8Array(await res.arrayBuffer());
-      let truncated = false;
-      let slice = buf;
-      if (buf.byteLength > maxBytes) {
-        slice = buf.slice(0, maxBytes);
-        truncated = true;
-        warnings.push(`Response truncated to ${maxBytes} bytes`);
-      }
-      const body = new TextDecoder('utf-8', { fatal: false }).decode(slice);
+      const bounded = await readBodyCapped(res, maxBytes);
+      if (bounded.truncated) warnings.push(`Response truncated to ${maxBytes} bytes`);
+      const body = new TextDecoder('utf-8', { fatal: false }).decode(bounded.bytes);
       if (!res.ok) {
         warnings.push(`HTTP ${res.status}`);
       }
@@ -111,7 +171,7 @@ export async function webFetch(
         route: 'http',
         warnings,
         redirects,
-        truncated,
+        truncated: bounded.truncated,
         code: res.ok ? undefined : 'HTTP_ERROR',
         message: res.ok ? undefined : `HTTP ${res.status}`,
       };
