@@ -372,19 +372,45 @@ export class LookoutEngine {
       hostsInclude: hostsInclude.length ? hostsInclude : undefined,
       hostsExclude: hostsExclude.length ? hostsExclude : undefined,
     });
+    const evidence = result.pages.flatMap((p) =>
+      (p.spans ?? []).map((s) => ({ url: p.url, kind: s.kind, text: s.text })),
+    );
+    const citeablePages = result.pages.filter(
+      (page) => page.fetchOk && (page.spans?.length ?? 0) > 0,
+    );
+    const pagesWithoutEvidence = result.pages.length - citeablePages.length;
+    const status: ToolEnvelope['status'] =
+      citeablePages.length === 0 ? 'error' : pagesWithoutEvidence > 0 ? 'partial' : 'ok';
+    const warnings = [...result.warnings];
+    if (pagesWithoutEvidence > 0) {
+      warnings.push(
+        `research pages without citeable spans: ${pagesWithoutEvidence}/${result.pages.length}`,
+      );
+    }
+    const code =
+      status === 'error'
+        ? result.hits.length > 0
+          ? 'NO_CITEABLE_EVIDENCE'
+          : 'NO_RESEARCH_RESULTS'
+        : undefined;
     return withFamilyEnvelope('web_research', {
-      status: 'ok',
+      status,
       tool: 'web_research',
       answer: {
         ...result,
         hostsInclude: hostsInclude.length ? hostsInclude : undefined,
         hostsExclude: hostsExclude.length ? hostsExclude : undefined,
       },
-      evidence: result.pages.flatMap((p) =>
-        (p.spans ?? []).map((s) => ({ url: p.url, kind: s.kind, text: s.text })),
-      ),
-      warnings: result.warnings,
+      evidence,
+      warnings,
       route: result.route,
+      code,
+      message:
+        code === 'NO_RESEARCH_RESULTS'
+          ? 'Research returned no search results'
+          : code === 'NO_CITEABLE_EVIDENCE'
+            ? 'Research returned no citeable source spans'
+            : undefined,
     });
   }
 
