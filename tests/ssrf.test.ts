@@ -19,6 +19,13 @@ describe('SSRF policy', () => {
     expect(assertSafeUrl('http://169.254.169.254/latest/meta-data/').ok).toBe(false);
   });
 
+  test('blocks IPv4-mapped and compatible private IPv6 targets', () => {
+    expect(assertSafeUrl('http://[::ffff:127.0.0.1]/').ok).toBe(false);
+    expect(assertSafeUrl('http://[::ffff:10.0.0.5]/').ok).toBe(false);
+    expect(assertSafeUrl('http://[::7f00:1]/').ok).toBe(false);
+    expect(assertSafeUrl('http://[::]/').ok).toBe(false);
+  });
+
   test('blocks non-http schemes', () => {
     expect(assertSafeUrl('file:///etc/passwd').ok).toBe(false);
   });

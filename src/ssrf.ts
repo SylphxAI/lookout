@@ -29,10 +29,68 @@ function isPrivateIpv4(parts: number[]): boolean {
 }
 
 function isPrivateIpv6(host: string): boolean {
-  const h = host.toLowerCase();
+  const h = host.toLowerCase().replace(/^\[|\]$/g, '').split('%')[0] ?? '';
+  if (!h.includes(':')) return false;
+
+  // URL normalisation turns IPv4-mapped forms such as
+  // [::ffff:127.0.0.1] into [::ffff:7f00:1]. Parse the address rather than
+  // relying on a textual prefix so those targets cannot bypass the IPv4
+  // policy. IPv4-compatible forms (::7f00:1) and the unspecified address (::)
+  // are local/non-routable too.
+  const halves = h.split('::');
+  if (halves.length > 2) return false;
+  const parseGroups = (part: string): number[] | null => {
+    if (!part) return [];
+    const tokens = part.split(':');
+    const groups: number[] = [];
+    for (const token of tokens) {
+      if (!token) return null;
+      if (token.includes('.')) {
+        const ipv4 = parseIpv4(token);
+        if (!ipv4) return null;
+        groups.push((ipv4[0]! << 8) | ipv4[1]!, (ipv4[2]! << 8) | ipv4[3]!);
+        continue;
+      }
+      if (!/^[0-9a-f]{1,4}$/i.test(token)) return null;
+      groups.push(Number.parseInt(token, 16));
+    }
+    return groups;
+  };
+
+  const left = parseGroups(halves[0] ?? '');
+  const right = parseGroups(halves[1] ?? '');
+  if (!left || !right) return false;
+  const missing = 8 - left.length - right.length;
+  if (halves.length === 1 ? missing !== 0 : missing < 1) return false;
+  const groups = halves.length === 1
+    ? left
+    : [...left, ...Array.from({ length: missing }, () => 0), ...right];
+  if (groups.length !== 8) return false;
+
+  if (groups.every((group) => group === 0)) return true; // unspecified ::
+  if (groups[0] === 0 && groups[1] === 0 && groups[2] === 0 && groups[3] === 0) {
+    if (groups[4] === 0 && groups[5] === 0xffff) {
+      return isPrivateIpv4([
+        groups[6]! >> 8,
+        groups[6]! & 0xff,
+        groups[7]! >> 8,
+        groups[7]! & 0xff,
+      ]);
+    }
+    if (groups[4] === 0 && groups[5] === 0) {
+      return isPrivateIpv4([
+        groups[6]! >> 8,
+        groups[6]! & 0xff,
+        groups[7]! >> 8,
+        groups[7]! & 0xff,
+      ]);
+    }
+  }
+
+  const first = groups[0]!;
+  if ((first & 0xfe00) === 0xfc00) return true; // ULA fc00::/7
+  if ((first & 0xffc0) === 0xfe80) return true; // link-local fe80::/10
   if (h === '::1') return true;
-  if (h.startsWith('fc') || h.startsWith('fd')) return true; // ULA
-  if (h.startsWith('fe80')) return true; // link-local
   return false;
 }
 
