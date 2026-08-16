@@ -41,6 +41,11 @@ See [COMPETITIVE.md](./COMPETITIVE.md).
 
 See [IPPB.md](./IPPB.md).
 
+## North Star
+
+See [NORTH_STAR.md](./NORTH_STAR.md) for the customer-value metric and its
+anti-proxies.
+
 ## Zero-config CTA
 
 ```bash

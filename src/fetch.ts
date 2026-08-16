@@ -37,7 +37,7 @@ export async function webFetch(
   const ua =
     options.userAgent ??
     process.env.LOOKOUT_USER_AGENT?.trim() ??
-    'Lookout/0.1 (+https://github.com/SylphxAI/lookout; local-first agent web instrument)';
+    'Lookout/0.2.1 (+https://github.com/SylphxAI/lookout; local-first agent web instrument)';
 
   for (let i = 0; i <= MAX_REDIRECTS; i++) {
     const safety = assertSafeUrl(current);
