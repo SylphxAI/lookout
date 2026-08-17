@@ -105,12 +105,15 @@ server.tool(
   {
     query: z.string().describe('Research question or keywords'),
     maxPages: z.number().int().min(1).max(6).optional(),
+    maxBytes: z.number().int().positive().optional().describe('Maximum bytes retained per fetched page'),
     hostsInclude: z.array(z.string()).optional().describe('Keep only research hits from these hosts'),
     hostsExclude: z.array(z.string()).optional().describe('Drop research hits from these hosts'),
   },
   async (args) => {
     const envelope = await engine.handle('web_research', args as Record<string, unknown>);
-    return textResult(envelope, envelope.status !== 'ok');
+    // Partial research still carries citeable evidence; reserve MCP isError
+    // for a result with no usable research outcome.
+    return textResult(envelope, envelope.status === 'error');
   },
 );
 

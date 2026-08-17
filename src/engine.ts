@@ -346,7 +346,7 @@ export class LookoutEngine {
 
   
   private async research(input: Record<string, unknown>): Promise<ToolEnvelope> {
-    const query = typeof input.query === 'string' ? input.query : Array.isArray(input.query) ? input.query.join(' ') : '';
+    const query = typeof input.query === 'string' ? input.query.trim() : Array.isArray(input.query) ? input.query.join(' ').trim() : '';
     if (!query.trim()) {
       return withFamilyEnvelope('web_research', {
         status: 'error',
@@ -357,6 +357,7 @@ export class LookoutEngine {
       });
     }
     const maxPages = typeof input.maxPages === 'number' ? input.maxPages : undefined;
+    const maxBytes = typeof input.maxBytes === 'number' ? input.maxBytes : undefined;
     const hostsInclude = Array.isArray(input.hostsInclude)
       ? input.hostsInclude.map(String)
       : input.hostInclude
@@ -369,22 +370,68 @@ export class LookoutEngine {
         : [];
     const result = await webResearch(query, {
       maxPages,
+      maxBytes,
       hostsInclude: hostsInclude.length ? hostsInclude : undefined,
       hostsExclude: hostsExclude.length ? hostsExclude : undefined,
     });
+    const evidence = result.pages.flatMap((page, pageIndex) =>
+      (page.spans ?? []).map((span, spanIndex) => ({
+        url: page.url,
+        finalUrl: page.finalUrl ?? page.url,
+        rank: pageIndex + 1,
+        pageIndex,
+        spanIndex,
+        kind: span.kind,
+        text: span.text,
+        start: span.start,
+        end: span.end,
+      })),
+    );
+    const citeablePages = result.pages.filter((page) => (page.spans?.length ?? 0) > 0);
+    const pagesWithoutEvidence = result.pages.length - citeablePages.length;
+    const partialPages = result.pages.filter((page) => page.status === 'partial').length;
+    const failedPages = result.pages.filter((page) => page.status === 'error').length;
+    const warnings = [...result.warnings];
+    if (pagesWithoutEvidence > 0) {
+      warnings.push(
+        `research pages without citeable spans: ${pagesWithoutEvidence}/${result.pages.length}`,
+      );
+    }
+    if (partialPages || failedPages) {
+      warnings.push(`research pages degraded: partial=${partialPages}; error=${failedPages}`);
+    }
+    const status: ToolEnvelope['status'] =
+      result.hits.length === 0
+        ? 'error'
+        : citeablePages.length === 0
+          ? 'error'
+          : partialPages || failedPages
+            ? 'partial'
+            : 'ok';
+    const code =
+      status === 'error'
+        ? result.hits.length === 0
+          ? 'NO_RESEARCH_RESULTS'
+          : 'NO_CITEABLE_EVIDENCE'
+        : undefined;
     return withFamilyEnvelope('web_research', {
-      status: 'ok',
+      status,
       tool: 'web_research',
       answer: {
         ...result,
         hostsInclude: hostsInclude.length ? hostsInclude : undefined,
         hostsExclude: hostsExclude.length ? hostsExclude : undefined,
       },
-      evidence: result.pages.flatMap((p) =>
-        (p.spans ?? []).map((s) => ({ url: p.url, kind: s.kind, text: s.text })),
-      ),
-      warnings: result.warnings,
+      evidence,
+      warnings,
       route: result.route,
+      code,
+      message:
+        code === 'NO_RESEARCH_RESULTS'
+          ? 'Research returned no search results'
+          : code === 'NO_CITEABLE_EVIDENCE'
+            ? 'Research returned no citeable source spans'
+            : undefined,
     });
   }
 
