@@ -8,8 +8,6 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { LookoutEngine } from './engine.ts';
 
-const engine = new LookoutEngine();
-
 function textResult(envelope: unknown, isError = false) {
   return {
     content: [{ type: 'text' as const, text: JSON.stringify(envelope, null, 2) }],
@@ -17,10 +15,11 @@ function textResult(envelope: unknown, isError = false) {
   };
 }
 
-const server = new McpServer({
-  name: 'lookout',
-  version: '0.2.1',
-});
+export function createMcpServer(engine: LookoutEngine = new LookoutEngine()) {
+  const server = new McpServer({
+    name: 'lookout',
+    version: '0.2.1',
+  });
 
 server.tool(
   'web_search',
@@ -114,5 +113,10 @@ server.tool(
   },
 );
 
-const transport = new StdioServerTransport();
-await server.connect(transport);
+  return server;
+}
+
+if (import.meta.main) {
+  const transport = new StdioServerTransport();
+  await createMcpServer().connect(transport);
+}
