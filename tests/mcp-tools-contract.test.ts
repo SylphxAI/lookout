@@ -1,18 +1,28 @@
 import { describe, expect, test } from 'bun:test';
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { Client } from '@modelcontextprotocol/sdk/client/index.js';
+import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { CORE_TOOLS } from '../src/engine.ts';
+import { createMcpServer } from '../src/mcp.ts';
 
 describe('MCP tool contract', () => {
-  test('mcp.ts registers the same four core tools', () => {
-    const src = readFileSync(join(import.meta.dir, '../src/mcp.ts'), 'utf8');
-    for (const tool of CORE_TOOLS) {
-      expect(src).toContain(`'${tool}'`);
+  test('MCP client sees core and advanced tools as separate registrations', async () => {
+    const server = createMcpServer();
+    const client = new Client({ name: 'lookout-contract-test', version: '0.0.0' });
+    const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+
+    await Promise.all([server.connect(serverTransport), client.connect(clientTransport)]);
+
+    try {
+      const result = await client.listTools();
+      expect(result.tools.map((tool) => tool.name)).toEqual([
+        ...CORE_TOOLS,
+        'web_cache',
+        'web_crawl',
+        'web_research',
+      ]);
+    } finally {
+      await client.close();
+      await server.close();
     }
-    // clear tools not merged into one god tool
-    expect(CORE_TOOLS).toEqual(['web_search', 'web_fetch', 'web_extract']);
-    // advanced tools stay separate (not folded into core)
-    expect(src).toContain("'web_crawl'");
-    expect(src).toContain("'web_research'");
   });
 });
