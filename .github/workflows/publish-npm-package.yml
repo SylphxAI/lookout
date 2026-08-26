@@ -24,7 +24,9 @@ jobs:
           always-auth: true
       - uses: oven-sh/setup-bun@v2
         with:
-          bun-version: '1.3.12'
+          bun-version: '1.4.0'
+      - name: Assert pinned Bun
+        run: test "$(bun --version)" = "1.4.0"
       - name: Publish from package dir
         working-directory: .
         env:
@@ -40,8 +42,8 @@ jobs:
           unset npm_config_workspace || true
           unset npm_config_workspaces || true
           npm whoami
-          NAME=$(node -p "require('./package.json').name")
-          VER=$(node -p "require('./package.json').version")
+          NAME=$(bun -e 'console.log(require("./package.json").name)')
+          VER=$(bun -e 'console.log(require("./package.json").version)')
           echo "cwd=$(pwd) publishing $NAME@$VER"
           if npm view "$NAME@$VER" version >/dev/null 2>&1; then
             echo already "$NAME@$VER"; npm view "$NAME" version dist-tags; exit 0
