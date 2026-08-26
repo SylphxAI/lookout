@@ -90,7 +90,8 @@ claude mcp add lookout -- npx -y @sylphx/lookout
 ```bash
 git clone https://github.com/SylphxAI/lookout.git
 cd lookout
-bun install
+# Bun 1.4.0 (.bun-version)
+bun install --frozen-lockfile
 ./bin/lookout tools
 ./bin/lookout extract   # via engine with -- see CLI
 ```

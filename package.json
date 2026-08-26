@@ -25,7 +25,7 @@
     "test": "bun test",
     "start": "bun src/cli.ts",
     "mcp": "bun src/mcp.ts",
-    "doctor": "./bin/lookout doctor",
+    "doctor": "bun src/cli.ts doctor",
     "benchmark:release-gate": "bun scripts/release-gate.ts",
     "validate": "bun test && bun scripts/release-gate.ts",
     "benchmark:public-proof": "bun scripts/public-proof.ts",
@@ -36,8 +36,9 @@
     "zod": "^3.25.76"
   },
   "engines": {
-    "node": ">=22"
+    "bun": ">=1.4.0"
   },
+  "packageManager": "bun@1.4.0",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SylphxAI/lookout.git"
