@@ -3,10 +3,15 @@
  * Lookout release gate — offline deterministic checks + doctor.
  * Live network is optional (LOOKOUT_LIVE=1) and never required for ship.
  */
-import { existsSync, mkdirSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { runDoctor } from '../src/doctor.ts';
-import { LookoutEngine, ADVANCED_TOOLS, CORE_TOOLS } from '../src/engine.ts';
+import {
+  LookoutEngine,
+  ADVANCED_TOOLS,
+  CORE_TOOLS,
+  LOOKOUT_PRODUCT_VERSION,
+} from '../src/engine.ts';
 import { extractFromHtml } from '../src/extract.ts';
 import { normalizeResultUrl, parseDuckDuckGoHtml } from '../src/search.ts';
 import { assertSafeUrl } from '../src/ssrf.ts';
@@ -23,6 +28,35 @@ add(
   'advanced_tools',
   ADVANCED_TOOLS.includes('web_crawl') && ADVANCED_TOOLS.includes('web_research'),
   `advanced=${ADVANCED_TOOLS.join(',')}`,
+);
+
+let packageVersion = '';
+let serverVersion = '';
+let serverPackageVersion = '';
+let versionMetadataError = '';
+try {
+  const packageManifest = JSON.parse(readFileSync(join(process.cwd(), 'package.json'), 'utf8')) as {
+    version?: unknown;
+  };
+  const serverManifest = JSON.parse(readFileSync(join(process.cwd(), 'server.json'), 'utf8')) as {
+    version?: unknown;
+    packages?: Array<{ identifier?: unknown; version?: unknown }>;
+  };
+  packageVersion = typeof packageManifest.version === 'string' ? packageManifest.version : '';
+  serverVersion = typeof serverManifest.version === 'string' ? serverManifest.version : '';
+  const npmPackage = serverManifest.packages?.find((p) => p.identifier === '@sylphx/lookout');
+  serverPackageVersion = typeof npmPackage?.version === 'string' ? npmPackage.version : '';
+} catch (error) {
+  versionMetadataError = error instanceof Error ? error.message : 'version metadata parse failed';
+}
+add(
+  'version_metadata',
+  !versionMetadataError &&
+    packageVersion === LOOKOUT_PRODUCT_VERSION &&
+    serverVersion === packageVersion &&
+    serverPackageVersion === packageVersion,
+  versionMetadataError ||
+    `package=${packageVersion || 'missing'} engine=${LOOKOUT_PRODUCT_VERSION} server=${serverVersion || 'missing'} npm=${serverPackageVersion || 'missing'}`,
 );
 
 const ssrf = assertSafeUrl('http://127.0.0.1/');

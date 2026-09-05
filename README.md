@@ -51,6 +51,7 @@ Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) (lear
 | [docs/TOOL_SURFACE.md](docs/TOOL_SURFACE.md) | Few clear tools policy |
 | [docs/PRODUCT_INDEPENDENCE.md](docs/PRODUCT_INDEPENDENCE.md) | This repo is SSOT |
 | [docs/IPPB.md](docs/IPPB.md) | Independent public product bar |
+| [docs/NORTH_STAR.md](docs/NORTH_STAR.md) | Customer-value North Star and evidence metric |
 | [docs/PUBLISH.md](docs/PUBLISH.md) | npm/git publish status |
 
 ## Agent skill surface
