@@ -50,6 +50,11 @@ export class Lookout {
     return this.engine.handle('web_research', { ...input, query });
   }
 
+  /** Compare two snapshots or URLs with a bounded word-level diff. */
+  diff(input: { before?: string; after?: string; beforeUrl?: string; afterUrl?: string } & Record<string, unknown>) {
+    return this.engine.handle('web_diff', input);
+  }
+
   /** Escape hatch for MCP-identical tool names (core + advanced). */
   call(tool: string, input: Record<string, unknown> = {}) {
     return this.engine.handle(tool, input);

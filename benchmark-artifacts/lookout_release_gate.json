@@ -1,22 +1,27 @@
 {
   "profile": "lookout_release_gate",
-  "generated_at": "2026-07-31T21:24:52.812Z",
+  "generated_at": "2026-09-22T15:12:38.010Z",
   "status": "passed",
   "summary": {
-    "total": 11,
-    "passed": 11,
+    "total": 12,
+    "passed": 12,
     "failed": 0
   },
   "checks": [
     {
       "id": "core_tools_count",
       "status": "passed",
-      "message": "core=web_search,web_fetch,web_extract,web_cache"
+      "message": "core=web_search,web_fetch,web_extract"
     },
     {
       "id": "advanced_tools",
       "status": "passed",
-      "message": "advanced=web_crawl,web_research"
+      "message": "advanced=web_cache,web_crawl,web_research,web_diff"
+    },
+    {
+      "id": "version_metadata",
+      "status": "passed",
+      "message": "package=0.3.0 engine=0.3.0 server=0.3.0 npm=0.3.0"
     },
     {
       "id": "ssrf_loopback_denied",

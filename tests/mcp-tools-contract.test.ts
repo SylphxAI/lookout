@@ -18,6 +18,7 @@ describe('MCP tool contract', () => {
         ...CORE_TOOLS,
         'web_cache',
         'web_crawl',
+        'web_diff',
         'web_research',
       ]);
     } finally {

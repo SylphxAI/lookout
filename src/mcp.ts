@@ -18,7 +18,7 @@ function textResult(envelope: unknown, isError = false) {
 export function createMcpServer(engine: LookoutEngine = new LookoutEngine()) {
   const server = new McpServer({
     name: 'lookout',
-    version: '0.2.1',
+    version: '0.3.0',
   });
 
 server.tool(
@@ -94,6 +94,22 @@ server.tool(
   },
   async (args) => {
     const envelope = await engine.handle('web_crawl', args as Record<string, unknown>);
+    return textResult(envelope, envelope.status !== 'ok');
+  },
+);
+
+server.tool(
+  'web_diff',
+  'Compare two text snapshots or fetched URLs and report added and removed words.',
+  {
+    before: z.string().optional(),
+    after: z.string().optional(),
+    beforeUrl: z.string().url().optional(),
+    afterUrl: z.string().url().optional(),
+    useCache: z.boolean().optional(),
+  },
+  async (args) => {
+    const envelope = await engine.handle('web_diff', args as Record<string, unknown>);
     return textResult(envelope, envelope.status !== 'ok');
   },
 );
