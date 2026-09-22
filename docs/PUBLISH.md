@@ -7,7 +7,8 @@ future releases.
 | Field | Value |
 | --- | --- |
 | Canonical npm | `@sylphx/lookout` |
-| Version last verified | `0.2.1` |
+| Version | `0.3.0` |
+| MCP Registry | `io.github.SylphxAI/lookout` |
 | Registry | **live** |
 | Auth | GitHub org `NPM_TOKEN` via `publish-npm-package.yml` |
 
@@ -22,7 +23,7 @@ Workflow: `.github/workflows/publish-npm-package.yml` (manual dispatch with
 
 ## Live
 
-Last verified 2026-08-16: `@sylphx/lookout@0.2.1` — `npx -y @sylphx/lookout`.
+The current release is `@sylphx/lookout@0.3.0` — `npx -y @sylphx/lookout`.
 
 The live package's CLI and MCP consumer paths were smoke-tested with `doctor`,
 `search`, MCP `initialize`, and `tools/list`.

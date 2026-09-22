@@ -1,3 +1,3 @@
 # Product independence — Lookout
 
-Brand-sole Instrument. Family law in skills. Prism retired.
+Brand-sole product. Family law in skills. Prism is not part of the public product surface.

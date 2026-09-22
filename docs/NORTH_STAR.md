@@ -23,7 +23,7 @@ Lookout is local-first and does not phone home. A request counts at most once.
 ## Floors
 
 - Core search, fetch, and extract work without a required API key.
-- Every result keeps the family envelope, route, warnings, gaps, and source
+- Every result keeps the result contract, route, warnings, gaps, and source
   locators intact.
 - SSRF protections and redirect/size limits stay enabled on fetch paths.
 - SDK, CLI, and MCP remain semantically aligned.

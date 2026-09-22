@@ -10,7 +10,7 @@ import { webResearch } from './research.ts';
 /** Family evidence envelope v1 fields required on every Lookout tool result. */
 export const ENVELOPE_VERSION = '1' as const;
 export const LOOKOUT_PRODUCT = 'lookout' as const;
-export const LOOKOUT_PRODUCT_VERSION = '0.2.1';
+export const LOOKOUT_PRODUCT_VERSION = '0.3.0';
 export const LOOKOUT_ROUTE = { engine: 'lookout-ts', path: 'default' } as const;
 
 export function withFamilyEnvelope<T extends Record<string, unknown>>(tool: string, body: T): T & {
@@ -92,6 +92,8 @@ export class LookoutEngine {
         return this.cacheTool(input);
       case 'web_research':
         return this.research(input);
+      case 'web_diff':
+        return this.diff(input);
       case 'web_crawl':
         return this.crawl(input);
       default:
@@ -103,6 +105,60 @@ export class LookoutEngine {
           message: `Unknown tool: ${tool}`,
         });
     }
+  }
+
+  private async diff(input: Record<string, unknown>): Promise<ToolEnvelope> {
+    const before = typeof input.before === 'string' ? input.before : undefined;
+    const after = typeof input.after === 'string' ? input.after : undefined;
+    const beforeUrl = typeof input.beforeUrl === 'string' ? input.beforeUrl : undefined;
+    const afterUrl = typeof input.afterUrl === 'string' ? input.afterUrl : undefined;
+    let beforeText = before;
+    let afterText = after;
+    const warnings: string[] = [];
+    if (!beforeText && beforeUrl) {
+      const result = await this.fetch({ url: beforeUrl, useCache: input.useCache });
+      if (result.status !== 'ok') return withFamilyEnvelope('web_diff', { ...result, tool: 'web_diff' });
+      beforeText = String((result.answer as { body?: string })?.body ?? '');
+    }
+    if (!afterText && afterUrl) {
+      const result = await this.fetch({ url: afterUrl, useCache: input.useCache });
+      if (result.status !== 'ok') return withFamilyEnvelope('web_diff', { ...result, tool: 'web_diff' });
+      afterText = String((result.answer as { body?: string })?.body ?? '');
+    }
+    if (!beforeText || !afterText) {
+      return withFamilyEnvelope('web_diff', {
+        status: 'error',
+        tool: 'web_diff',
+        warnings: [],
+        code: 'INVALID_INPUT',
+        message: 'web_diff requires before/after text or beforeUrl/afterUrl',
+      });
+    }
+    const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
+    const a = normalize(beforeText);
+    const b = normalize(afterText);
+    const beforeWords = new Set(a.split(' ').filter(Boolean));
+    const afterWords = new Set(b.split(' ').filter(Boolean));
+    const added = [...afterWords].filter((word) => !beforeWords.has(word)).sort();
+    const removed = [...beforeWords].filter((word) => !afterWords.has(word)).sort();
+    const identical = a === b;
+    if (beforeUrl) warnings.push(`before source: ${beforeUrl}`);
+    if (afterUrl) warnings.push(`after source: ${afterUrl}`);
+    return withFamilyEnvelope('web_diff', {
+      status: 'ok',
+      tool: 'web_diff',
+      answer: {
+        identical,
+        beforeLength: a.length,
+        afterLength: b.length,
+        addedWords: added.slice(0, 200),
+        removedWords: removed.slice(0, 200),
+        addedCount: added.length,
+        removedCount: removed.length,
+      },
+      warnings,
+      route: 'local_text_diff',
+    });
   }
 
   private async search(input: Record<string, unknown>): Promise<ToolEnvelope> {
@@ -468,4 +524,4 @@ export class LookoutEngine {
 }
 
 export const CORE_TOOLS = ['web_search', 'web_fetch', 'web_extract'] as const;
-export const ADVANCED_TOOLS = ['web_cache', 'web_crawl', 'web_research'] as const;
+export const ADVANCED_TOOLS = ['web_cache', 'web_crawl', 'web_research', 'web_diff'] as const;

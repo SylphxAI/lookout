@@ -1,162 +1,90 @@
 # Lookout
 
-## Zero-config (no install)
+### Web research with source-level proof
+
+Lookout gives agents a small, fast, local web product: search, fetch,
+extract, cache, crawl, and research with citeable excerpts.
 
 ```bash
 npx -y @sylphx/lookout
 ```
 
-Starts the MCP server on stdio. CLI:
-
-```bash
-npx -y @sylphx/lookout doctor
-npx -y @sylphx/lookout search "local first agents"
-```
-
-
-### The web from your machine. 
-
-**Lookout** is a local-first **web instrument** for agents and apps: **search, fetch, extract, cache** with citeable excerpts — **no required API key**, **tiny default install**, same API on **SDK · CLI · MCP**.
-
-Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) (learn multi-surface + honesty; **do not** require multi-GB browser/model warmup).
-
-
-
-
-## Why Lookout wins for agents
-
-1. **Zero-config web instrument** — `npx -y @sylphx/lookout` (MCP on stdio by default).
-2. **No API key required** for core search/fetch/extract paths.
-3. **Citeable excerpts** — agents get evidence-shaped results, not anonymous blurbs.
-4. **Local-first cache** — faster repeat research, fewer surprise network calls.
-5. **CLI + MCP** — `npx -y @sylphx/lookout doctor|search|fetch|extract`.
-
-| | Generic web scraper | Paid search API | **Lookout** |
-| --- | --- | --- | --- |
-| Agent-ready MCP | ❌ | sometimes | ✅ stdio MCP |
-| Zero-config | rare | account setup | **`npx -y`** |
-| API key | optional | required | **not required for core** |
-| Evidence shape | DIY | vendor JSON | family envelope |
-
-**Live:** `@sylphx/lookout@0.2.1` · bin `lookout`.
-
-
-## Product docs
-
-| Doc | Purpose |
-| --- | --- |
-| [docs/POSITIONING.md](docs/POSITIONING.md) | Strategic positioning |
-| [docs/COMPETITIVE.md](docs/COMPETITIVE.md) | Peer anchors and wedge |
-| [docs/EVIDENCE_CONTRACT.md](docs/EVIDENCE_CONTRACT.md) | Evidence = result contract |
-| [docs/TOOL_SURFACE.md](docs/TOOL_SURFACE.md) | Few clear tools policy |
-| [docs/PRODUCT_INDEPENDENCE.md](docs/PRODUCT_INDEPENDENCE.md) | This repo is SSOT |
-| [docs/IPPB.md](docs/IPPB.md) | Independent public product bar |
-| [docs/NORTH_STAR.md](docs/NORTH_STAR.md) | Customer-value North Star and evidence metric |
-| [docs/PUBLISH.md](docs/PUBLISH.md) | npm/git publish status |
-
-## Agent skill surface
-
-See [`skills/lookout/SKILL.md`](./skills/lookout/SKILL.md).
-
-## Why Lookout (vs multi-GB “local web” stacks)
-
-| Typical agent web path | Lookout |
-| --- | --- |
-| Paid search API keys | Default **public adapters**, $0/query |
-| Multi-GB browser + model warmup | **Tiny default** — HTML search/fetch/extract |
-| Opaque snippets | **Cite spans** + extract route + warnings |
-| One mega-tool | **Clear tools**: search · fetch · extract · cache (+ advanced crawl) |
-
-Primary competitive anchor: [wigolo](https://github.com/KnockOutEZ/wigolo) — learn multi-surface honesty; **do not** require heavy browser/model installs on the default path.
-
-Evidence is a **result contract** (spans, routes, warnings) — not a tool named `evidence_first`.
-
-## Install (30 seconds)
-
-```bash
-npm install -g @sylphx/lookout
-# brand bin
-lookout doctor
-lookout search "model context protocol"
-```
-
-Claude Code:
+For Claude Code:
 
 ```bash
 claude mcp add lookout -- npx -y @sylphx/lookout
 ```
 
-## Install (dev)
+## The fastest useful workflow
 
 ```bash
-git clone https://github.com/SylphxAI/lookout.git
-cd lookout
-# Bun 1.4.0 (.bun-version)
-bun install --frozen-lockfile
-./bin/lookout tools
-./bin/lookout extract   # via engine with -- see CLI
+npx -y @sylphx/lookout search "Model Context Protocol"
+npx -y @sylphx/lookout fetch https://example.com
+npx -y @sylphx/lookout extract https://example.com
 ```
+
+The MCP server exposes the same workflow to agents. Results include source
+URLs, excerpt spans, fetch routes, freshness signals, warnings, and gaps.
+
+## Jobs Lookout is built for
+
+| Ask your agent | Lookout returns |
+| --- | --- |
+| “Research this topic.” | ranked sources with citeable excerpts |
+| “Read this page.” | clean content and source spans |
+| “Extract this table or schema.” | structured page data |
+| “What changed since yesterday?” | cached page diff |
+| “Find similar sources.” | related pages and concepts |
+
+## Tool surface
+
+| Tool | Purpose |
+| --- | --- |
+| `web_search` | Search public adapters in parallel |
+| `web_fetch` | Fetch a URL with SSRF protections |
+| `web_extract` | Extract title, metadata, tables, and citeable spans |
+| `web_cache` | Query and manage local cache |
+| `web_crawl` | Bounded same-origin crawl |
+| `web_research` | Multi-step search, fetch, extract, and source synthesis |
+| `web_diff` | Compare two snapshots or URLs with bounded word-level diff |
+
+## Predictable defaults
+
+- `fast` uses local HTML search and fetch with no API key.
+- `quality` explicitly enables richer extraction and local cache expansion.
+- `research` is an explicit multi-step operation with page and budget limits.
+- Browser rendering and model synthesis are opt-in.
+- Private addresses, unsupported schemes, oversized responses, and blocked
+  pages fail honestly.
+
+## Why agents trust it
+
+Lookout returns excerpts pinned to source spans and labels stale cache,
+failed engines, redirects, blocked pages, and extraction gaps. It does not
+turn a challenge page or a thin response into a confident answer.
+
+## Companion MCP tools
+
+| Product | Job |
+| --- | --- |
+| [Citra](https://github.com/SylphxAI/citra) | PDF answers with page-level proof |
+| [Iris](https://github.com/SylphxAI/iris) | Image facts and pixel evidence |
+| [Cue](https://github.com/SylphxAI/cue) | Video timelines and timestamp evidence |
+| [Spine](https://github.com/SylphxAI/spine) | Repository architecture and impact |
+| [Locus](https://github.com/SylphxAI/locus) | Exact code-chunk retrieval |
+
+Each product is independent. Install only the tools your agent needs.
+
+## Development
 
 ```bash
-# CLI
-./bin/lookout doctor
-./bin/lookout tools
-./bin/lookout search "local-first agents"
-./bin/lookout fetch https://example.com
-./bin/lookout extract https://example.com
-./bin/lookout cache stats
-./bin/lookout crawl https://example.com --depth 0 --pages 2
-
-# MCP (stdio)
-bun src/mcp.ts
-# or: ./bin/lookout mcp
+bun install
+bun test
+bun run doctor
+bun run benchmark:public-proof
+bun run benchmark:release-gate
 ```
 
-## SDK
-
-```ts
-import { Lookout } from '@sylphx/lookout'
-
-const lookout = Lookout.create()
-const search = await lookout.search('model context protocol')
-const page = await lookout.fetch('https://example.com')
-const extracted = await lookout.extract({ url: 'https://example.com' })
-```
-
-## Tools (clear, not merged)
-
-| Tool | Job |
-| --- | --- |
-| `web_search` | Public adapters (DuckDuckGo HTML + Wikipedia + npm registry + HN Algolia), rank fusion, query-term boost, host filters |
-| `web_fetch` | SSRF-safe HTTP(S) fetch, redirects, size limits, cite spans |
-| `web_extract` | Title, description, JSON-LD, tables, spans from HTML/URL |
-| `web_cache` (advanced) | Local disk cache query/stats/clear/prune (`LOOKOUT_CACHE_DIR`, optional max age) |
-| `web_crawl` *(advanced)* | Same-origin, depth-limited crawl (not a full-site crawler) |
-| `web_research` *(advanced)* | Search then fetch/extract top pages with citeable excerpts |
-
-## Environment
-
-| Var | Purpose |
-| --- | --- |
-| `LOOKOUT_CACHE_DIR` | Cache directory (default `~/.cache/lookout`) |
-| `LOOKOUT_CACHE_MAX_AGE_MS` | Optional max age for search/fetch cache hits |
-| `LOOKOUT_LIVE=1` | Enable optional live network tests |
-| `LOOKOUT_USER_AGENT` | Optional User-Agent override for fetch |
-| `LOOKOUT_FETCH_TIMEOUT_MS` | Optional fetch timeout (ms) |
-| `LOOKOUT_FETCH_MAX_BYTES` | Optional max response body bytes |
-
-## Safety
-
-- Private IPv4/IPv6, localhost, link-local metadata hosts **denied**
-- Only `http`/`https`
-- Redirect cap + response size cap
-
-## Family
-
-Citra · Iris · Cue · Prism · Spine · **Lookout**
-
-Company portfolio knowledge (docs only — not a product monorepo):
-This repository is product SSOT. Sibling agent tools are separate repositories and are not vendored here.
 ## License
 
 MIT

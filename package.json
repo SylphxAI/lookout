@@ -1,8 +1,8 @@
 {
   "name": "@sylphx/lookout",
-  "version": "0.2.1",
+  "version": "0.3.0",
   "private": false,
-  "description": "Lookout \u2014 local-first web instrument for agents. Search, fetch, extract, cache with citeable excerpts. No required API key. SDK \u00b7 CLI \u00b7 MCP.",
+  "description": "Lookout — web research with source-level proof. Local-first search, fetch, extract, cache, and citeable excerpts.",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -29,7 +29,10 @@
     "benchmark:release-gate": "bun scripts/release-gate.ts",
     "validate": "bun test && bun scripts/release-gate.ts",
     "benchmark:public-proof": "bun scripts/public-proof.ts",
-    "brand:pack-plan": "bun scripts/brand-pack-plan.ts"
+    "brand:pack-plan": "bun scripts/brand-pack-plan.ts",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs"
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.29.0",
@@ -43,7 +46,7 @@
     "type": "git",
     "url": "git+https://github.com/SylphxAI/lookout.git"
   },
-  "homepage": "https://github.com/SylphxAI/lookout#readme",
+  "homepage": "https://sylphxai.github.io/lookout/",
   "mcpName": "io.github.SylphxAI/lookout",
   "keywords": [
     "mcp",
@@ -55,5 +58,8 @@
   ],
   "publishConfig": {
     "access": "public"
+  },
+  "devDependencies": {
+    "vitepress": "1.6.4"
   }
 }
