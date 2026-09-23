@@ -50,11 +50,25 @@
   "mcpName": "io.github.SylphxAI/lookout",
   "keywords": [
     "mcp",
-    "local-first",
+    "model-context-protocol",
     "web-search",
+    "web-research",
+    "web-scraping",
+    "fetch",
+    "extract",
+    "html",
+    "crawl",
+    "cache",
+    "citations",
+    "source-excerpts",
+    "search",
+    "research",
+    "ssrf-safe",
+    "local-first",
+    "ai-agents",
+    "developer-tools",
     "lookout",
-    "sylphx",
-    "agent"
+    "sylphx"
   ],
   "publishConfig": {
     "access": "public"
