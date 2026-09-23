@@ -1,21 +1,36 @@
+<div align="center">
+
+<img src="docs/public/logo.svg" alt="Lookout" width="108" height="108" />
+
 # Lookout
 
-### Web research with source-level proof
+### Web answers with source-level proof.
 
-Lookout gives agents a small, fast, local web product: search, fetch,
-extract, cache, crawl, and research with citeable excerpts.
+**Search and fetch citeable excerpts. No API key.** Hits name the adapter. Fetches keep a span, warnings, and gaps. Multi-step research is a separate tool.
 
-```bash
-npx -y @sylphx/lookout
-```
+[![npm](https://img.shields.io/npm/v/@sylphx/lookout?style=flat-square&labelColor=070b0c&color=5eead4)](https://www.npmjs.com/package/@sylphx/lookout)
+[![license](https://img.shields.io/badge/license-MIT-5eead4?style=flat-square&labelColor=070b0c)](LICENSE)
 
-For Claude Code:
+**npm** [`@sylphx/lookout`](https://www.npmjs.com/package/@sylphx/lookout) · **bin** `lookout` · **MCP** `io.github.SylphxAI/lookout`
 
-```bash
-claude mcp add lookout -- npx -y @sylphx/lookout
-```
+</div>
 
-## The fastest useful workflow
+---
+
+## The problem
+
+A search snippet is a title and a URL. The agent then paraphrases a page it never opened. When the body is missing, a confident summary is worse than a gap.
+
+## The difference
+
+| A snippet says | Lookout returns |
+| --- | --- |
+| “Release notes” and a URL | title, description, excerpt span, and any table rows it could read |
+| nothing when the fetch fails | a warning or an error: blocked address, HTTP status, truncation, empty extract |
+
+Fetch reads the HTTP response. It does not run JavaScript, and it does not write a model summary.
+
+## Search, then open the page
 
 ```bash
 npx -y @sylphx/lookout search "Model Context Protocol"
@@ -23,45 +38,52 @@ npx -y @sylphx/lookout fetch https://example.com
 npx -y @sylphx/lookout extract https://example.com
 ```
 
-The MCP server exposes the same workflow to agents. Results include source
-URLs, excerpt spans, fetch routes, freshness signals, warnings, and gaps.
+`search` queries DuckDuckGo HTML, Wikipedia OpenSearch, the npm registry, and Hacker News Algolia, then ranks the hits. It does not fetch those pages and it does not run `web_research`.
 
-## Jobs Lookout is built for
+## Install
 
-| Ask your agent | Lookout returns |
+```bash
+npx -y @sylphx/lookout
+```
+
+That starts a stdio MCP server. No API key.
+
+| Your client | Setup |
 | --- | --- |
-| “Research this topic.” | ranked sources with citeable excerpts |
-| “Read this page.” | clean content and source spans |
-| “Extract this table or schema.” | structured page data |
-| “What changed since yesterday?” | cached page diff |
-| “Find similar sources.” | related pages and concepts |
+| **Any agent / CLI** | `npx -y @sylphx/lookout` |
+| **Claude Code** | `claude mcp add lookout -- npx -y @sylphx/lookout` |
+| **Claude Desktop / Cursor / VS Code / Codex** | `"command": "npx", "args": ["-y", "@sylphx/lookout"]` |
 
-## Tool surface
+```json
+{
+  "mcpServers": {
+    "lookout": { "command": "npx", "args": ["-y", "@sylphx/lookout"] }
+  }
+}
+```
 
-| Tool | Purpose |
+## Tools
+
+| Tool | When to call it |
 | --- | --- |
-| `web_search` | Search public adapters in parallel |
-| `web_fetch` | Fetch a URL with SSRF protections |
-| `web_extract` | Extract title, metadata, tables, and citeable spans |
-| `web_cache` | Query and manage local cache |
-| `web_crawl` | Bounded same-origin crawl |
-| `web_research` | Multi-step search, fetch, extract, and source synthesis |
-| `web_diff` | Compare two snapshots or URLs with bounded word-level diff |
+| `web_search` | Ranked hits from the four public adapters. No API key. |
+| `web_fetch` | One URL. SSRF checks, redirect cap, size cap, body-prefix span. |
+| `web_extract` | Title, metadata, tables, and spans from HTML or a URL. |
+| `web_cache` | Query or manage the on-disk cache. Not a web search. |
+| `web_crawl` | Bounded same-origin crawl. Not the search default. |
+| `web_research` | Named multi-step tool: search, then fetch and extract the top pages (default 3, max 6). |
+| `web_diff` | Added and removed words between two texts or two URLs. |
 
-## Predictable defaults
+There is no profile switch. The tool you name is the work that runs. Cache is on for search and fetch unless you pass `useCache: false`. A cache hit replays an earlier response from disk. The first search still needs the network.
 
-- `fast` uses local HTML search and fetch with no API key.
-- `quality` explicitly enables richer extraction and local cache expansion.
-- `research` is an explicit multi-step operation with page and budget limits.
-- Browser rendering and model synthesis are opt-in.
-- Private addresses, unsupported schemes, oversized responses, and blocked
-  pages fail honestly.
+Reference: [tools](https://sylphxai.github.io/lookout/reference/tools) · [defaults](https://sylphxai.github.io/lookout/reference/defaults)
 
-## Why agents trust it
+## What it will not pretend
 
-Lookout returns excerpts pinned to source spans and labels stale cache,
-failed engines, redirects, blocked pages, and extraction gaps. It does not
-turn a challenge page or a thin response into a confident answer.
+- Private, loopback, and link-local addresses are rejected.
+- A failed adapter, a non-200 response, a truncated body, or an empty extract is reported. It is not turned into a clean answer.
+- `web_fetch` does not honor `robots.txt` unless you set `respectRobots: true`. `web_crawl` honors it unless you turn that off.
+- Lookout does not render a browser and does not synthesize an answer.
 
 ## Companion MCP tools
 
@@ -75,14 +97,21 @@ turn a challenge page or a thin response into a confident answer.
 
 Each product is independent. Install only the tools your agent needs.
 
+## Documentation
+
+| | |
+| --- | --- |
+| Website | [sylphxai.github.io/lookout](https://sylphxai.github.io/lookout/) |
+| Quickstart | [Install and first call](https://sylphxai.github.io/lookout/guide/quickstart) |
+| Compare | [Firecrawl, Tavily, and what Lookout actually does](https://sylphxai.github.io/lookout/COMPETITIVE) |
+
 ## Development
 
 ```bash
 bun install
 bun test
 bun run doctor
-bun run benchmark:public-proof
-bun run benchmark:release-gate
+bun run docs:build
 ```
 
 ## License

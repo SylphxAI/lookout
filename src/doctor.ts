@@ -15,7 +15,7 @@ export function runDoctor(version = '0.2.1'): DoctorReport {
     name: 'family_envelope_v1',
     status: 'ok',
     message:
-      'Lookout advertises envelope_version=1 product=lookout engine=lookout-ts (src/engine.ts withFamilyEnvelope)',
+      'Lookout advertises envelope_version=1 product=lookout engine=lookout-ts',
   });
   checks.push({
     name: 'core_tools',

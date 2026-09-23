@@ -2,7 +2,7 @@
 import { LookoutEngine, CORE_TOOLS, ADVANCED_TOOLS } from './engine.ts';
 
 function usage(): never {
-  console.log(`Lookout — local-first web instrument (Sylphx)
+  console.log(`Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.
 
 Usage:
   lookout search <query...>

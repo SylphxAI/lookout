@@ -1,5 +1,5 @@
 /**
- * Lookout SDK — local-first web instrument (Sylphx).
+ * Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.
  * Surfaces: SDK · CLI · MCP share LookoutEngine semantics.
  */
 import { LookoutEngine, type EngineOptions, type ToolEnvelope, CORE_TOOLS, ADVANCED_TOOLS } from './engine.ts';

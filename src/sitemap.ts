@@ -1,4 +1,4 @@
-/** Light sitemap.xml URL extraction (local-first, no full sitemap protocol). */
+/** Light sitemap.xml URL extraction. Not a full sitemap client. */
 
 export function parseSitemapXml(body: string, limit = 50): string[] {
   const urls: string[] = [];

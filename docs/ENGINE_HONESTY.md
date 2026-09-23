@@ -1,8 +1,5 @@
 # Engine honesty — Lookout
 
-Lookout's production engine is currently **TypeScript** (`src/engine.ts` and modules).
+Lookout's production engine is TypeScript. Tool results report `route.engine` as `lookout-ts`.
 
-Unlike Citra/Iris/Cue/Spine, Lookout does **not** claim sole-Rust production.
-Family Rust-first preference remains; a Rust core is a future hard cut, not present authority.
-
-Do not market Lookout as sole-Rust until a native binary is the default production path.
+Lookout does not ship a Rust binary as the production path, and these docs do not describe it as one.

@@ -1,5 +1,5 @@
 /**
- * SSRF policy — deny private/link-local/metadata targets. Local-first safety for Lookout.
+ * SSRF policy — deny private/link-local/metadata targets.
  */
 
 const BLOCKED_HOSTNAMES = new Set([

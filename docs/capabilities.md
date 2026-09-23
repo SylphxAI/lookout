@@ -12,18 +12,18 @@
 
 | Capability | Tool | Evidence |
 | --- | --- | --- |
-| Web search | `web_search` | ranked sources, adapters, citeable excerpts |
-| Page fetch | `web_fetch` | source spans, redirects, SSRF-safe route |
+| Web search | `web_search` | ranked hits, the adapter name on each hit, adapter warnings |
+| Page fetch | `web_fetch` | body, redirect list, body-prefix span, SSRF check |
 | Structured extraction | `web_extract` | title, metadata, JSON-LD, tables, spans |
-| Cache | `web_cache` | cached snapshots and freshness |
+| Cache | `web_cache` | on-disk snapshots; a hit replays an earlier response |
 | Bounded crawl | `web_crawl` | same-origin, depth and page limits |
-| Research | `web_research` | multi-step search, fetch and extraction with citations |
-| Snapshot diff | `web_diff` | bounded word-level comparison of two snapshots or URLs |
+| Multi-step read | `web_research` | search, then fetch and extract (default 3, maximum 6). Not called by `web_search` |
+| Snapshot diff | `web_diff` | added and removed words; lists capped at 200, counts are full |
 
 ## Evidence contract
 
-Every result carries source URL, excerpt spans, routes, freshness, warnings and gaps. See [EVIDENCE_CONTRACT.md](./EVIDENCE_CONTRACT.md).
+Search hits name a URL and an adapter. Fetch and extract add excerpt spans. Warnings and gaps stay on the result. See [EVIDENCE_CONTRACT.md](./EVIDENCE_CONTRACT.md).
 
 ## Not owned
 
-Paid search APIs as a requirement, default browser automation, model synthesis as evidence authority, and non-web evidence.
+A required paid search API, browser rendering, a model-written summary as the evidence, and evidence that is not from the web.
