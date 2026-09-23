@@ -1,6 +1,6 @@
 {
   "profile": "lookout_release_gate",
-  "generated_at": "2026-09-22T15:12:38.010Z",
+  "generated_at": "2026-09-23T22:06:12.436Z",
   "status": "passed",
   "summary": {
     "total": 12,
@@ -21,7 +21,7 @@
     {
       "id": "version_metadata",
       "status": "passed",
-      "message": "package=0.3.0 engine=0.3.0 server=0.3.0 npm=0.3.0"
+      "message": "package=0.3.3 engine=0.3.3 server=0.3.3 npm=0.3.3"
     },
     {
       "id": "ssrf_loopback_denied",

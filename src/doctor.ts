@@ -1,6 +1,7 @@
 import { ADVANCED_TOOLS, CORE_TOOLS, LookoutEngine } from './engine.ts';
 import { defaultCacheDir } from './cache.ts';
 import { assertSafeUrl } from './ssrf.ts';
+import { LOOKOUT_PRODUCT_VERSION } from './version.ts';
 
 export type DoctorReport = {
   ok: boolean;
@@ -9,7 +10,7 @@ export type DoctorReport = {
   checks: { name: string; status: 'ok' | 'warn' | 'fail'; message: string }[];
 };
 
-export function runDoctor(version = '0.2.1'): DoctorReport {
+export function runDoctor(version = LOOKOUT_PRODUCT_VERSION): DoctorReport {
   const checks: DoctorReport['checks'] = [];
   checks.push({
     name: 'family_envelope_v1',

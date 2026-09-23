@@ -1,6 +1,6 @@
 {
   "name": "@sylphx/lookout",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "private": false,
   "description": "Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.",
   "type": "module",

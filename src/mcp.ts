@@ -7,6 +7,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { LookoutEngine } from './engine.ts';
+import { LOOKOUT_PRODUCT_VERSION } from './version.ts';
 
 function textResult(envelope: unknown, isError = false) {
   return {
@@ -18,7 +19,7 @@ function textResult(envelope: unknown, isError = false) {
 export function createMcpServer(engine: LookoutEngine = new LookoutEngine()) {
   const server = new McpServer({
     name: 'lookout',
-    version: '0.3.2',
+    version: LOOKOUT_PRODUCT_VERSION,
     description:
       'Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.',
     websiteUrl: 'https://sylphxai.github.io/lookout/',
