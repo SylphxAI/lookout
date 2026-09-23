@@ -18,7 +18,7 @@ function textResult(envelope: unknown, isError = false) {
 export function createMcpServer(engine: LookoutEngine = new LookoutEngine()) {
   const server = new McpServer({
     name: 'lookout',
-    version: '0.3.1',
+    version: '0.3.2',
     description:
       'Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.',
     websiteUrl: 'https://sylphxai.github.io/lookout/',

@@ -7,13 +7,13 @@
     "url": "https://github.com/SylphxAI/lookout",
     "source": "github"
   },
-  "version": "0.3.1",
+  "version": "0.3.2",
   "websiteUrl": "https://sylphxai.github.io/lookout/",
   "packages": [
     {
       "registryType": "npm",
       "identifier": "@sylphx/lookout",
-      "version": "0.3.1",
+      "version": "0.3.2",
       "transport": {
         "type": "stdio"
       }
