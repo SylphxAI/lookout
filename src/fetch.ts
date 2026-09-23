@@ -1,4 +1,5 @@
 import { assertSafeUrl } from './ssrf.ts';
+import { lookoutUserAgent } from './version.ts';
 
 export type FetchResult = {
   ok: boolean;
@@ -34,10 +35,7 @@ export async function webFetch(
   const timeoutMs =
     options.timeoutMs ??
     (envTimeout && Number.isFinite(Number(envTimeout)) ? Number(envTimeout) : DEFAULT_TIMEOUT_MS);
-  const ua =
-    options.userAgent ??
-    process.env.LOOKOUT_USER_AGENT?.trim() ??
-    'Lookout/0.2.1 (+https://github.com/SylphxAI/lookout; local-first agent web instrument)';
+  const ua = options.userAgent ?? process.env.LOOKOUT_USER_AGENT?.trim() ?? lookoutUserAgent();
 
   for (let i = 0; i <= MAX_REDIRECTS; i++) {
     const safety = assertSafeUrl(current);
