@@ -1,6 +1,6 @@
 {
   "name": "@sylphx/lookout",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": false,
   "description": "Lookout — web research with source-level proof. Local-first search, fetch, extract, cache, and citeable excerpts.",
   "type": "module",
