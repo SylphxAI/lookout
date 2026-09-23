@@ -1,12 +1,11 @@
 # Evidence contract — Lookout
 
-Result contract v1. Locators: URL, rank, excerpt spans.
-Route must state engine (`lookout-ts` until a Rust core ships).
-Gaps: SSRF deny, robots deny, adapter failure.
-No paid API key required for primary path.
-No `evidence_first` tool.
+Result contract v1. A locator is a URL, a rank, or an excerpt span.
+`route.engine` is `lookout-ts`.
+A gap can be an SSRF deny, a robots deny, or an adapter failure.
+The primary path does not require a paid API key.
 
-## Implemented family wire fields (v1)
+## Implemented wire fields (v1)
 
 Every tool result includes:
 
@@ -14,6 +13,4 @@ Every tool result includes:
 - `status`, `tool`, `product`, `product_version`
 - `route` as `{ engine, path? }`
 - `warnings` and `gaps` arrays (may be empty)
-- domain payload (often also as top-level twin/results/answer for compatibility)
-
-Schema: `SylphxAI/skills` `schemas/product-evidence-envelope.schema.json`.
+- the domain payload on `answer`

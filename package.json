@@ -1,8 +1,8 @@
 {
   "name": "@sylphx/lookout",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "private": false,
-  "description": "Lookout — web research with source-level proof. Local-first search, fetch, extract, cache, and citeable excerpts.",
+  "description": "Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.",
   "type": "module",
   "license": "MIT",
   "bin": {
@@ -64,7 +64,6 @@
     "search",
     "research",
     "ssrf-safe",
-    "local-first",
     "ai-agents",
     "developer-tools",
     "lookout",

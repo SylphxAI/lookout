@@ -1,29 +1,18 @@
 # Publish status — Lookout
 
-This file records the package/release contract and the last verified registry
-readback. The package manifest and publish workflow remain authoritative for
-future releases.
+This file records the package identity and a registry readback. The package manifest stays authoritative for the next release. This repository change does not publish one.
 
 | Field | Value |
 | --- | --- |
 | Canonical npm | `@sylphx/lookout` |
-| Version | `0.3.0` |
-| MCP Registry | `io.github.SylphxAI/lookout` |
-| Registry | **live** |
-| Auth | GitHub org `NPM_TOKEN` via `publish-npm-package.yml` |
+| npm version read back | `0.3.1` |
+| MCP name | `io.github.SylphxAI/lookout` |
+| MCP registry latest | `0.3.1` |
+
+Read back on 2026-09-23. npm `0.3.1` and MCP registry `0.3.1` still serve the previous descriptions. Those registries change only when a later version is published.
 
 ## Install
 
 ```bash
-npm i -g @sylphx/lookout
+npx -y @sylphx/lookout
 ```
-
-Workflow: `.github/workflows/publish-npm-package.yml` (manual dispatch with
-`confirm=PUBLISH`, self-hosted `sylphx-linux-standard` runner).
-
-## Live
-
-The current release is `@sylphx/lookout@0.3.0` — `npx -y @sylphx/lookout`.
-
-The live package's CLI and MCP consumer paths were smoke-tested with `doctor`,
-`search`, MCP `initialize`, and `tools/list`.

@@ -18,15 +18,15 @@ function textResult(envelope: unknown, isError = false) {
 export function createMcpServer(engine: LookoutEngine = new LookoutEngine()) {
   const server = new McpServer({
     name: 'lookout',
-    version: '0.3.1',
+    version: '0.3.2',
     description:
-      'Lookout — local-first web research with source-level proof (search, fetch, extract, cache, crawl, research).',
+      'Lookout — web answers with source-level proof. Search and fetch citeable excerpts, no API key.',
     websiteUrl: 'https://sylphxai.github.io/lookout/',
   });
 
 server.tool(
   'web_search',
-  'Local-first web search via public adapters (no API key). Returns ranked hits with score explanations.',
+  'Search public adapters (no API key). Returns ranked hits with adapter names.',
   {
     query: z.union([z.string(), z.array(z.string())]).describe('Search query or queries'),
     useCache: z.boolean().optional(),
@@ -119,7 +119,7 @@ server.tool(
 
 server.tool(
   'web_research',
-  'Advanced: search then fetch/extract top public pages with citeable excerpts (local-first, no API key).',
+  'Advanced. Search, then fetch and extract the top pages (default 3, maximum 6). Not used by web_search.',
   {
     query: z.string().describe('Research question or keywords'),
     maxPages: z.number().int().min(1).max(6).optional(),
