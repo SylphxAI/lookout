@@ -41,7 +41,7 @@
   "engines": {
     "bun": ">=1.4.0"
   },
-  "packageManager": "bun@1.4.0",
+  "packageManager": "bun@1.4.2",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/SylphxAI/lookout.git"
